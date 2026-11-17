@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "拼车 / 拼搭子详情",
+  "usingComponents": {
+    "access-gate": "../../components/access-gate/access-gate"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "滑雪搭子",
+  "usingComponents": {
+    "access-gate": "../../components/access-gate/access-gate"
+  }
+}

@@ -1,0 +1,91 @@
+<view class="page">
+    <access-gate wx:if="{{gate}}" gate="{{gate}}" bind:refresh="onRefresh" />
+    <block wx:else>
+    <view class="hero hero-photo">
+        <image class="hero-photo-bg" src="/assets/module-trip.jpg" mode="aspectFill" />
+        <view class="hero-photo-mask"></view>
+        <text class="hero-kicker">CLUB TRIP · 一起出发</text>
+        <text class="hero-title">俱乐部参团</text>
+        <text class="hero-sub">多档价格可选，集合时间地点一目了然</text>
+    </view>
+
+    <view class="card notice-card" wx:if="{{!canAct}}">
+        <view class="row between">
+            <text class="strong">访客浏览 · 内容概览</text>
+        </view>
+        <text class="card-desc">所有模块已开放浏览，活动行程与价格可先看；{{actHint}}</text>
+        <view class="btn-row">
+            <button wx:if="{{guest}}" class="btn btn-primary btn-sm" bindtap="onLogin">登录 / 注册</button>
+            <button wx:else class="btn btn-plain btn-sm" bindtap="onLogin">查看审核状态</button>
+        </view>
+    </view>
+
+    <view class="card notice-card" bindtap="onPayment">
+        <view class="row between">
+            <text class="strong">{{isAdmin ? '管理员 · 活动与收款管理' : '俱乐部统一发布'}}</text>
+            <text class="section-more" wx:if="{{isAdmin}}">支付接入 ›</text>
+        </view>
+        <text class="card-desc">{{isAdmin ? '你可以发布活动、设置价格档位与收款方式，在活动详情页查看本活动报名人员并导出名单、确认收款。' : '参团活动与价格档位由俱乐部管理员统一发布，所有模块已开放浏览；登录并审核通过后即可查看详细信息并在线报名，实名资料会自动带入。'}}</text>
+    </view>
+
+    <view class="filters">
+        <view class="filter-item {{filter === 'all' ? 'filter-on' : ''}}" data-value="all" bindtap="onFilter">全部</view>
+        <view class="filter-item {{filter === 'official' ? 'filter-on' : ''}}" data-value="official" bindtap="onFilter">俱乐部官方</view>
+        <view class="filter-item {{filter === 'other' ? 'filter-on' : ''}}" data-value="other" bindtap="onFilter">其他活动</view>
+    </view>
+
+    <view wx:if="{{loading}}" class="state">正在加载云端数据…</view>
+    <view wx:elif="{{error}}" class="state">
+        <text class="state-title">加载失败</text>
+        <text>{{error}}</text>
+        <view class="state-action" bindtap="load">重新加载</view>
+    </view>
+    <view wx:elif="{{list.length === 0}}" class="state">
+        <text class="state-title">还没有出游活动</text>
+        <text>{{isAdmin ? '点右下角按钮发布一次雪季出行' : '俱乐部管理员发布活动后会出现在这里'}}</text>
+    </view>
+
+    <view wx:else>
+        <view class="card" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="onOpen">
+            <view class="card-head">
+                <text class="card-title">{{item.title}}</text>
+                <text class="tag-official" wx:if="{{item.isOpen}}">报名中</text>
+                <text class="chip chip-muted" wx:else>{{item.statusText}}</text>
+            </view>
+            <view class="chip-row">
+                <text class="tag-official" wx:if="{{item.is_official}}">俱乐部官方</text>
+                <text class="chip chip-muted" wx:else>俱乐部活动</text>
+                <text class="chip chip-muted">{{item.transport}}</text>
+                <text class="chip chip-muted">限 {{item.capacity}} 人</text>
+            </view>
+            <view class="info-grid">
+                <view class="info-cell">
+                    <text class="info-cell-label">出发</text>
+                    <text class="info-cell-value">{{item.depart_time}}</text>
+                </view>
+                <view class="info-cell">
+                    <text class="info-cell-label">返程</text>
+                    <text class="info-cell-value">{{item.return_time}}</text>
+                </view>
+                <view class="info-cell">
+                    <text class="info-cell-label">集合地点</text>
+                    <text class="info-cell-value">{{item.gather_place}}</text>
+                </view>
+                <view class="info-cell">
+                    <text class="info-cell-label">目的雪场</text>
+                    <text class="info-cell-value">{{item.resortText}}</text>
+                </view>
+            </view>
+            <view class="card-foot">
+                <text class="price">{{item.priceText}}<text class="price-unit"> 起</text></text>
+                <text class="small muted" wx:if="{{isAdmin}}">{{item.paymentText}}</text>
+            </view>
+        </view>
+    </view>
+
+    <view class="fab" wx:if="{{isAdmin}}" bindtap="onPublish">
+        <text class="fab-plus">＋</text>
+        <text>发布活动</text>
+    </view>
+    </block>
+</view>

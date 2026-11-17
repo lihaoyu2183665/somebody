@@ -1,0 +1,128 @@
+<view class="page page-no-tab">
+    <access-gate wx:if="{{gate}}" gate="{{gate}}" bind:refresh="onRefresh" />
+    <block wx:else>
+    <view class="review-tip">教练专属：资料与可约时段提交后需管理员审核，通过才会对外展示；修改内容会重新进入审核。</view>
+    <view class="hero hero-plain">
+        <text class="hero-kicker">教练入驻 · 编辑</text>
+        <text class="hero-title">{{id ? '管理教练主页' : '成为俱乐部教练'}}</text>
+        <text class="hero-sub">资料与可约时段都保存在云端</text>
+    </view>
+
+    <view class="form-card">
+        <text class="form-title">教练资料</text>
+        <view class="coach-avatar-row" bindtap="onOpenPicker">
+            <view class="avatar avatar-lg {{avatarClass}}">
+                <image wx:if="{{avatarUrl}}" class="avatar-photo" src="{{avatarUrl}}" mode="aspectFill" />
+                <text wx:else>{{avatarInitial}}</text>
+            </view>
+            <view class="coach-avatar-info">
+                <text class="form-label">教练头像</text>
+                <text class="form-hint">点击头像上传照片，或选用小程序内置的卡通头像。</text>
+            </view>
+        </view>
+        <view class="form-item">
+            <text class="form-label">姓名 <text class="form-required">*</text></text>
+            <input class="form-input" value="{{name}}" bindinput="onNameInput" placeholder="真实姓名或常用称呼" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">头衔</text>
+            <input class="form-input" value="{{title}}" bindinput="onTitleInput" placeholder="例如：国家一级社会体育指导员" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">资质证书</text>
+            <input class="form-input" value="{{certificates}}" bindinput="onCertificatesInput" placeholder="例如：CASI Level 2 / 国职滑雪教练" />
+        </view>
+        <view class="form-line">
+            <view class="form-item">
+                <text class="form-label">教龄（年）</text>
+                <input class="form-input" type="number" value="{{years}}" bindinput="onYearsInput" placeholder="3" />
+            </view>
+            <view class="form-item">
+                <text class="form-label">课时价（元）</text>
+                <input class="form-input" type="digit" value="{{price}}" bindinput="onPriceInput" placeholder="300" />
+            </view>
+        </view>
+        <view class="form-item">
+            <text class="form-label">常驻雪场</text>
+            <input class="form-input" value="{{resort}}" bindinput="onResortInput" placeholder="例如：崇礼万龙" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">擅长方向</text>
+            <input class="form-input" value="{{specialties}}" bindinput="onSpecialtiesInput" placeholder="双板基础 / 单板刻滑 / 儿童教学" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">教练简介</text>
+            <textarea class="form-textarea" value="{{bio}}" bindinput="onBioInput" placeholder="教学风格、课程安排、适合人群" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">联系方式</text>
+            <input class="form-input" value="{{contact}}" bindinput="onContactInput" placeholder="微信号 / 手机号" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">接单状态</text>
+            <picker mode="selector" range="{{statusLabels}}" value="{{statusIndex}}" bindchange="onStatusChange">
+                <view class="form-picker">{{statusText}}<text class="muted">›</text></view>
+            </picker>
+        </view>
+    </view>
+
+    <text class="form-error" wx:if="{{error}}">{{error}}</text>
+    <button class="btn btn-primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="onSubmit">保存教练资料</button>
+
+    <view class="section">
+        <text class="section-title"><text class="section-mark"></text>可约时段</text>
+    </view>
+    <view class="card" wx:if="{{!id}}">
+        <text class="muted">先保存教练资料，就可以添加可约时段了。</text>
+    </view>
+    <block wx:else>
+        <view class="card">
+            <view class="slot-row" wx:for="{{slots}}" wx:key="id">
+                <view class="slot-main">
+                    <text class="slot-time">{{item.date}} {{item.start_time}} - {{item.end_time}}</text>
+                    <text class="slot-note">{{item.resortText}} · 可约 {{item.capacity}} 人</text>
+                </view>
+                <button class="btn btn-danger btn-sm" data-id="{{item.id}}" bindtap="onRemoveSlot">删除</button>
+            </view>
+            <text class="muted" wx:if="{{slots.length === 0}}">还没有可约时段</text>
+        </view>
+        <view class="form-card">
+            <text class="form-title">新增可约时段</text>
+            <view class="form-item">
+                <text class="form-label">日期</text>
+                <picker mode="date" value="{{slotDate}}" bindchange="onSlotDate">
+                    <view class="form-picker">{{slotDate}}<text class="muted">›</text></view>
+                </picker>
+            </view>
+            <view class="form-line">
+                <view class="form-item">
+                    <text class="form-label">开始时间</text>
+                    <picker mode="time" value="{{slotStart}}" bindchange="onSlotStart">
+                        <view class="form-picker">{{slotStart}}<text class="muted">›</text></view>
+                    </picker>
+                </view>
+                <view class="form-item">
+                    <text class="form-label">结束时间</text>
+                    <picker mode="time" value="{{slotEnd}}" bindchange="onSlotEnd">
+                        <view class="form-picker">{{slotEnd}}<text class="muted">›</text></view>
+                    </picker>
+                </view>
+            </view>
+            <view class="form-item">
+                <text class="form-label">上课雪场</text>
+                <input class="form-input" value="{{slotResort}}" bindinput="onSlotResortInput" placeholder="与常驻雪场一致可留空" />
+            </view>
+            <view class="form-item">
+                <text class="form-label">可约人数</text>
+                <input class="form-input" type="number" value="{{slotCapacity}}" bindinput="onSlotCapacityInput" placeholder="1" />
+            </view>
+            <button class="btn btn-ghost mt-16" bindtap="onAddSlot">添加时段</button>
+        </view>
+    </block>
+
+    <view class="mt-24" wx:if="{{id}}">
+        <button class="btn btn-danger" bindtap="onDelete">删除教练资料</button>
+    </view>
+    </block>
+    <avatar-picker show="{{pickerShow}}" value="{{avatarValue}}" title="更换教练头像" bind:close="onClosePicker" bind:change="onAvatarChange" />
+</view>

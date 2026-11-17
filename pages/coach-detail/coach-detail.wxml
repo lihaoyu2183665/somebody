@@ -1,0 +1,139 @@
+<view class="page">
+    <access-gate wx:if="{{gate}}" gate="{{gate}}" bind:refresh="onRefresh" />
+    <block wx:else>
+    <view wx:if="{{loading}}" class="state">正在加载云端数据…</view>
+    <view wx:elif="{{error}}" class="state">
+        <text class="state-title">加载失败</text>
+        <text>{{error}}</text>
+        <view class="state-action" bindtap="load">重新加载</view>
+    </view>
+
+    <view wx:else>
+        <view class="card">
+            <view class="coach-card-head">
+                <view class="coach-avatar-wrap" bindtap="onOpenPicker">
+                    <view class="avatar avatar-lg {{coach.avatarClass}}">
+                        <image wx:if="{{coach.avatarUrl}}" class="avatar-photo" src="{{coach.avatarUrl}}" mode="aspectFill" />
+                        <text wx:else>{{coach.initial}}</text>
+                    </view>
+                    <text class="avatar-edit-hint" wx:if="{{canManage}}">点击更换</text>
+                </view>
+                <view class="coach-info">
+                    <text class="card-title">{{coach.name}}</text>
+                    <text class="gear-sub">{{coach.titleText}}</text>
+                    <view class="chip-row">
+                        <text class="chip">{{coach.yearsText}}</text>
+                        <text class="chip chip-muted">{{coach.resortText}}</text>
+                    </view>
+                </view>
+            </view>
+            <view class="divider"></view>
+            <view class="info-row">
+                <text class="info-label">资质证书</text>
+                <text class="info-value">{{coach.certificatesText}}</text>
+            </view>
+            <view class="info-row">
+                <text class="info-label">擅长方向</text>
+                <text class="info-value">{{coach.specialtiesText}}</text>
+            </view>
+            <view class="info-row">
+                <text class="info-label">课时价格</text>
+                <text class="info-value">¥{{coach.priceText}} / 课时</text>
+            </view>
+            <view class="info-row">
+                <text class="info-label">联系方式</text>
+                <text class="info-value">{{coach.contactText}}</text>
+            </view>
+            <view class="divider"></view>
+            <text class="form-label">教练简介</text>
+            <text class="info-value">{{coach.bioText}}</text>
+        </view>
+
+        <block wx:if="{{canManage}}">
+            <view class="section">
+                <text class="section-title"><text class="section-mark"></text>教练资料管理</text>
+            </view>
+            <view class="card">
+                <text class="card-desc">可修改资料、增删可约时段，或下架教练主页。</text>
+                <button class="btn btn-ghost" bindtap="onManage">管理资料与时段</button>
+            </view>
+        </block>
+
+        <block wx:if="{{isHost || isAdmin}}">
+            <view class="section">
+                <text class="section-title"><text class="section-mark"></text>课程预约（{{bookings.length}}）</text>
+            </view>
+            <view class="card" wx:if="{{bookings.length === 0}}">
+                <text class="muted">暂时还没有学员预约</text>
+            </view>
+            <view class="card" wx:for="{{bookings}}" wx:key="id">
+                <view class="row between">
+                    <text class="strong">{{item.ownerText}}</text>
+                    <text class="muted">{{item.slotText}}</text>
+                </view>
+                <text class="card-desc">{{item.contactText}} · {{item.levelText}} · {{item.noteText}}</text>
+            </view>
+        </block>
+
+        <view class="section">
+            <text class="section-title"><text class="section-mark"></text>可约时段</text>
+        </view>
+        <view class="card" wx:if="{{slots.length === 0}}">
+            <text class="muted">教练还没有开放可约时段</text>
+        </view>
+        <view class="option-item {{selectedId === item.id ? 'option-on' : ''}}" wx:for="{{slots}}" wx:key="id" data-id="{{item.id}}" bindtap="onSelectSlot">
+            <view class="option-dot {{selectedId === item.id ? 'option-dot-on' : ''}}"></view>
+            <view class="option-main">
+                <text class="option-name">{{item.date}} {{item.start_time}} - {{item.end_time}}</text>
+                <text class="option-note">{{item.resortText}} · 可约 {{item.capacity}} 人</text>
+            </view>
+            <image class="ico" src="/assets/ico-calendar.png" mode="aspectFit" />
+        </view>
+
+        <view class="card mt-24" wx:if="{{!canManage && slots.length > 0}}">
+            <text class="section-title"><text class="section-mark"></text>填写预约信息</text>
+            <view class="form-item">
+                <text class="form-label">学员姓名</text>
+                <input class="form-input" value="{{contactName}}" bindinput="onContactNameInput" placeholder="姓名" />
+            </view>
+            <view class="form-item">
+                <text class="form-label">联系电话</text>
+                <input class="form-input" type="number" value="{{contactPhone}}" bindinput="onContactPhoneInput" placeholder="手机号" />
+            </view>
+            <view class="form-item">
+                <text class="form-label">当前水平</text>
+                <picker mode="selector" range="{{levelLabels}}" value="{{levelIndex}}" bindchange="onLevelChange">
+                    <view class="form-picker">{{levelText}}<text class="muted">›</text></view>
+                </picker>
+            </view>
+            <view class="form-item">
+                <text class="form-label">备注</text>
+                <input class="form-input" value="{{note}}" bindinput="onNoteInput" placeholder="想练习的内容 / 是否需要租装备" />
+            </view>
+        </view>
+
+        <view class="section">
+            <text class="section-title"><text class="section-mark"></text>我的预约</text>
+        </view>
+        <view class="card" wx:if="{{myBookings.length === 0}}">
+            <text class="muted">你还没有预约这位教练</text>
+        </view>
+        <view class="card" wx:for="{{myBookings}}" wx:key="id">
+            <view class="row between">
+                <text class="strong">{{item.slotText}}</text>
+                <text class="chip">{{item.statusText}}</text>
+            </view>
+            <text class="card-desc">{{item.contactText}} · {{item.levelText}}</text>
+            <view class="btn-row">
+                <button class="btn btn-danger" data-id="{{item.id}}" bindtap="onCancelBooking">取消预约</button>
+            </view>
+        </view>
+    </view>
+
+    <view class="footer-bar" wx:if="{{!loading && !error && !canManage}}">
+        <button class="btn btn-primary" wx:if="{{slots.length > 0}}" loading="{{submitting}}" disabled="{{submitting}}" bindtap="onSubmit">确认预约</button>
+        <button class="btn btn-neutral" wx:else>暂无可约时段</button>
+    </view>
+    </block>
+    <avatar-picker show="{{pickerShow}}" value="{{avatarValue}}" title="更换教练头像" bind:close="onClosePicker" bind:change="onAvatarChange" />
+</view>

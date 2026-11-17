@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "俱乐部参团",
+  "usingComponents": {
+    "access-gate": "../../components/access-gate/access-gate"
+  }
+}

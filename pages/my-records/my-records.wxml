@@ -1,0 +1,53 @@
+<view class="page page-no-tab">
+    <access-gate wx:if="{{gate}}" gate="{{gate}}" bind:refresh="onRefresh" />
+    <block wx:else>
+    <view class="hero hero-plain">
+        <text class="hero-kicker">MY RECORDS</text>
+        <text class="hero-title">我的记录</text>
+        <text class="hero-sub">发布、报名、订单与预约，随时查看与管理</text>
+    </view>
+
+    <view class="filters">
+        <view class="filter-item {{tab === 'posts' ? 'filter-on' : ''}}" data-value="posts" bindtap="onTab">我的发布</view>
+        <view class="filter-item {{tab === 'signups' ? 'filter-on' : ''}}" data-value="signups" bindtap="onTab">拼车报名</view>
+        <view class="filter-item {{tab === 'orders' ? 'filter-on' : ''}}" data-value="orders" bindtap="onTab">参团订单</view>
+        <view class="filter-item {{tab === 'bookings' ? 'filter-on' : ''}}" data-value="bookings" bindtap="onTab">约课预约</view>
+    </view>
+
+    <view wx:if="{{loading}}" class="state">正在加载云端数据…</view>
+    <view wx:elif="{{error}}" class="state">
+        <text class="state-title">加载失败</text>
+        <text>{{error}}</text>
+        <view class="state-action" bindtap="load">重新加载</view>
+    </view>
+    <view wx:elif="{{list.length === 0}}" class="state">
+        <text class="state-title">这里还是空的</text>
+        <text>去对应模块发布或报名，记录会自动出现在这里</text>
+    </view>
+
+    <view wx:else>
+        <view class="card" wx:for="{{list}}" wx:key="key">
+            <view class="card-head">
+                <text class="card-title">{{item.title}}</text>
+                <text class="chip">{{item.statusText}}</text>
+            </view>
+            <view class="chip-row">
+                <text class="chip chip-muted">{{item.typeText}}</text>
+                <text class="chip {{item.reviewText === '已通过' ? 'chip-ok' : 'chip-warn'}}" wx:if="{{tab === 'posts'}}">{{item.reviewText}}</text>
+                <text class="chip {{item.paymentTone}}" wx:if="{{tab === 'orders'}}">{{item.paymentText}}</text>
+            </view>
+            <text class="card-desc" wx:if="{{item.reviewNote}}">审核意见：{{item.reviewNote}}</text>
+            <text class="card-desc" wx:if="{{tab === 'orders' && item.outTradeNo}}">业务单号：{{item.outTradeNo}}</text>
+            <text class="card-desc">{{item.sub}}</text>
+            <view class="card-foot">
+                <text class="muted">{{item.timeText}}</text>
+                <view class="card-actions">
+                    <button class="btn btn-plain btn-sm" data-path="{{item.path}}" bindtap="onOpen">查看</button>
+                    <button class="btn btn-ghost btn-sm" wx:if="{{item.editPath}}" data-path="{{item.editPath}}" bindtap="onEdit">编辑</button>
+                    <button class="btn btn-danger btn-sm" wx:if="{{tab !== 'orders' || !item.isPaid}}" data-id="{{item.id}}" data-table="{{item.table}}" bindtap="onRemove">{{tab === 'posts' ? '删除' : '取消'}}</button>
+                </view>
+            </view>
+        </view>
+    </view>
+    </block>
+</view>

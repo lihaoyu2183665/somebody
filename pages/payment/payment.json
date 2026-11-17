@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "收款与支付接入",
+  "usingComponents": {
+    "access-gate": "../../components/access-gate/access-gate"
+  }
+}

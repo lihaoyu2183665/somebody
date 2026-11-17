@@ -1,0 +1,156 @@
+<view class="page">
+    <access-gate wx:if="{{gate}}" gate="{{gate}}" bind:refresh="onRefresh" />
+    <block wx:else>
+    <view wx:if="{{loading}}" class="state">正在加载云端数据…</view>
+    <view wx:elif="{{error}}" class="state">
+        <text class="state-title">加载失败</text>
+        <text>{{error}}</text>
+        <view class="state-action" bindtap="load">重新加载</view>
+    </view>
+
+    <view wx:else>
+        <view class="card">
+            <view class="card-head">
+                <text class="card-title">{{post.title}}</text>
+                <text class="tag-official" wx:if="{{post.isOpen}}">报名中</text>
+                <text class="chip chip-muted" wx:else>{{post.statusText}}</text>
+            </view>
+            <view class="chip-row">
+                <text class="chip">{{post.kindText}}</text>
+                <text class="chip chip-muted">{{post.transport}}</text>
+                <text class="chip chip-muted">可拼 {{post.seats}} 人</text>
+            </view>
+            <view class="divider"></view>
+            <view class="info-row">
+                <image class="ico" src="/assets/ico-clock.png" mode="aspectFit" />
+                <text class="info-label">出发时间</text>
+                <text class="info-value">{{post.depart_time}}</text>
+            </view>
+            <view class="info-row">
+                <image class="ico" src="/assets/ico-clock.png" mode="aspectFit" />
+                <text class="info-label">返程时间</text>
+                <text class="info-value">{{post.return_time}}</text>
+            </view>
+            <view class="info-row">
+                <image class="ico" src="/assets/ico-pin.png" mode="aspectFit" />
+                <text class="info-label">出发地点</text>
+                <text class="info-value">{{post.depart_place}}</text>
+            </view>
+            <view class="info-row">
+                <image class="ico" src="/assets/ico-pin.png" mode="aspectFit" />
+                <text class="info-label">返程地点</text>
+                <text class="info-value">{{post.returnPlaceText}}</text>
+            </view>
+            <view class="info-row">
+                <image class="ico" src="/assets/ico-pin.png" mode="aspectFit" />
+                <text class="info-label">目的雪场</text>
+                <text class="info-value">{{post.resortText}}</text>
+            </view>
+            <view class="info-row">
+                <image class="ico" src="/assets/ico-car.png" mode="aspectFit" />
+                <text class="info-label">出行方式</text>
+                <text class="info-value">{{post.transport}}</text>
+            </view>
+            <view class="divider"></view>
+            <view class="info-row">
+                <text class="info-label">费用分摊</text>
+                <text class="info-value">{{post.feeRuleText}}</text>
+            </view>
+            <view class="info-row">
+                <text class="info-label">行程说明</text>
+                <text class="info-value">{{post.itineraryText}}</text>
+            </view>
+            <view class="info-row">
+                <text class="info-label">联系方式</text>
+                <text class="info-value">{{post.contactText}}</text>
+            </view>
+            <view class="card-foot">
+                <text class="muted">{{post.ownerText}} 发起</text>
+                <text class="muted">{{post.createdText}}</text>
+            </view>
+        </view>
+
+        <block wx:if="{{canManage}}">
+            <view class="section">
+                <text class="section-title"><text class="section-mark"></text>管理这条信息</text>
+            </view>
+            <view class="card">
+                <text class="card-desc">只有发起人或俱乐部管理员可以修改、删除这条信息。</text>
+                <view class="btn-row">
+                    <button class="btn btn-ghost" bindtap="onEdit">编辑</button>
+                    <button class="btn btn-danger" bindtap="onDelete">删除</button>
+                </view>
+            </view>
+        </block>
+
+        <view class="section">
+            <text class="section-title"><text class="section-mark"></text>报名人员信息（{{signupPeople}} 人报名）</text>
+        </view>
+        <view class="card">
+            <text class="card-desc">{{isAdmin ? '点击拼团人或报名人姓名，可查看完整会员资料；普通会员只能看到报名人的姓名、电话、性别。' : '点击报名人姓名可查看姓名、电话、性别；其余资料仅俱乐部管理员可见。'}}</text>
+        </view>
+        <view class="card" wx:if="{{people.length === 0}}">
+            <text class="muted">暂时还没有人报名</text>
+        </view>
+        <view class="card" wx:for="{{people}}" wx:key="key">
+            <view class="person-row">
+                <view class="person-row-main">
+                    <text class="person-name" data-key="{{item.key}}" bindtap="onOpenPerson">{{item.name}}</text>
+                    <text class="person-row-sub">{{item.roleKindText}}<block wx:if="{{item.seatsText}}"> · {{item.seatsText}}</block></text>
+                </view>
+                <text class="chip chip-muted" wx:if="{{isAdmin}}">{{item.statusText}}</text>
+            </view>
+        </view>
+
+        <view class="card" wx:if="{{mySignup}}">
+            <text class="section-title"><text class="section-mark"></text>我的报名</text>
+            <view class="info-row">
+                <text class="info-label">报名人数</text>
+                <text class="info-value">{{mySignup.seats}} 人</text>
+            </view>
+            <view class="info-row">
+                <text class="info-label">我的备注</text>
+                <text class="info-value">{{mySignup.noteText}}</text>
+            </view>
+            <view class="btn-row">
+                <button class="btn btn-danger" bindtap="onCancelSignup">取消报名</button>
+            </view>
+        </view>
+
+        <view class="card" wx:if="{{!mySignup && post.isOpen}}">
+            <text class="section-title"><text class="section-mark"></text>加入这次出行</text>
+            <view class="form-item">
+                <text class="form-label">报名人数</text>
+                <input class="form-input" type="number" value="{{seats}}" bindinput="onSeatsInput" placeholder="1" />
+            </view>
+            <view class="form-item">
+                <text class="form-label">给发起人的备注</text>
+                <input class="form-input" value="{{note}}" bindinput="onNoteInput" placeholder="例如：可带装备 / 从某站上车" />
+            </view>
+            <text class="form-hint">报名后可在「我的记录」中查看与取消；管理员同样可以为自己报名。</text>
+        </view>
+    </view>
+
+    <view class="footer-bar" wx:if="{{!loading && !error}}">
+        <button class="btn btn-primary" wx:if="{{!mySignup && post.isOpen}}" loading="{{submitting}}" disabled="{{submitting}}" bindtap="onSignup">立即报名</button>
+        <button class="btn btn-neutral" wx:elif="{{!mySignup}}">报名已结束</button>
+        <button class="btn btn-ghost" wx:else bindtap="onGoRecords">查看我的记录</button>
+    </view>
+
+    <view class="person-mask" wx:if="{{detailPerson}}" bindtap="onClosePerson"></view>
+    <view class="person-panel" wx:if="{{detailPerson}}">
+        <view class="person-panel-head">
+            <text class="person-panel-title">{{detailPerson.title}}</text>
+            <text class="person-panel-close" bindtap="onClosePerson">✕</text>
+        </view>
+        <text class="person-panel-hint">{{detailPerson.hint}}</text>
+        <view class="person-panel-body">
+            <view class="detail-line" wx:for="{{detailPerson.lines}}" wx:key="key">
+                <text class="detail-key">{{item.key}}</text>
+                <text class="detail-value" style="color:{{item.color}}">{{item.value}}</text>
+            </view>
+        </view>
+        <button class="btn btn-primary" bindtap="onClosePerson">关闭</button>
+    </view>
+    </block>
+</view>

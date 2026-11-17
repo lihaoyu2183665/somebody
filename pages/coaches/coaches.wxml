@@ -1,0 +1,74 @@
+<view class="page">
+    <access-gate wx:if="{{gate}}" gate="{{gate}}" bind:refresh="onRefresh" />
+    <block wx:else>
+    <view class="hero hero-photo">
+        <image class="hero-photo-bg" src="/assets/module-coach.jpg" mode="aspectFill" />
+        <view class="hero-photo-mask"></view>
+        <text class="hero-kicker">COACH · 一起进步</text>
+        <text class="hero-title">教练平台</text>
+        <text class="hero-sub">看资质、看时段，直接预约一节好课</text>
+    </view>
+
+    <view class="review-tip">教练主页与可约时段仅由俱乐部认证教练发布，资料提交后需管理员审核通过才对外展示。</view>
+
+    <view class="card notice-card" wx:if="{{!canView}}">
+        <view class="row between">
+            <text class="strong">访客浏览 · 内容概览</text>
+        </view>
+        <text class="card-desc">所有模块已开放浏览，可以先看看有哪些教练；{{actHint}}</text>
+        <view class="btn-row">
+            <button wx:if="{{guest}}" class="btn btn-primary btn-sm" bindtap="onLogin">登录 / 注册</button>
+            <button wx:else class="btn btn-plain btn-sm" bindtap="onLogin">查看审核状态</button>
+        </view>
+    </view>
+
+    <view class="filters">
+        <view class="filter-item {{filter === 'all' ? 'filter-on' : ''}}" data-value="all" bindtap="onFilter">全部教练</view>
+        <view class="filter-item {{filter === 'active' ? 'filter-on' : ''}}" data-value="active" bindtap="onFilter">可预约</view>
+        <view class="filter-item {{filter === 'mine' ? 'filter-on' : ''}}" data-value="mine" bindtap="onFilter">我发布的</view>
+    </view>
+
+    <view wx:if="{{loading}}" class="state">正在加载云端数据…</view>
+    <view wx:elif="{{error}}" class="state">
+        <text class="state-title">加载失败</text>
+        <text>{{error}}</text>
+        <view class="state-action" bindtap="load">重新加载</view>
+    </view>
+    <view wx:elif="{{list.length === 0}}" class="state">
+        <text class="state-title">{{pendingMine && filter === 'mine' ? '教练资料正在审核中' : '还没有教练入驻'}}</text>
+        <text>{{pendingMine && filter === 'mine' ? '审核通过后会自动展示在这里' : (canCoach ? '点右下角按钮发布你的教练资料' : '教练资料由认证教练发布，可在「我的」申请教练权限')}}</text>
+    </view>
+
+    <view wx:else>
+        <view class="card" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="onOpen">
+            <view class="coach-card-head">
+                <view class="avatar avatar-lg {{item.avatarClass}}">
+                    <image wx:if="{{item.avatarUrl}}" class="avatar-photo" src="{{item.avatarUrl}}" mode="aspectFill" />
+                    <text wx:else>{{item.initial}}</text>
+                </view>
+                <view class="coach-info">
+                    <view class="row between">
+                        <text class="card-title">{{item.name}}</text>
+                        <text class="chip chip-muted" wx:if="{{item.isMine}}">我发布的</text>
+                    </view>
+                    <text class="gear-sub">{{item.titleText}}</text>
+                    <view class="chip-row">
+                        <text class="chip">{{item.resortText}}</text>
+                        <text class="chip chip-muted">{{item.yearsText}}</text>
+                    </view>
+                </view>
+            </view>
+            <text class="card-desc">{{item.specialtiesText}}</text>
+            <view class="card-foot">
+                <text class="price">¥{{item.priceText}}<text class="price-unit"> / 课时</text></text>
+                <text class="muted">{{item.statusText}}</text>
+            </view>
+        </view>
+    </view>
+
+    <view class="fab" bindtap="onPublish">
+        <text class="fab-plus">＋</text>
+        <text>{{canCoach ? '管理教练主页' : '成为教练'}}</text>
+    </view>
+    </block>
+</view>

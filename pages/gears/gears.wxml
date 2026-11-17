@@ -1,0 +1,72 @@
+<view class="page">
+    <access-gate wx:if="{{gate}}" gate="{{gate}}" bind:refresh="onRefresh" />
+    <block wx:else>
+    <view class="hero hero-photo">
+        <image class="hero-photo-bg" src="/assets/module-gear.jpg" mode="aspectFill" />
+        <view class="hero-photo-mask"></view>
+        <text class="hero-kicker">GEAR MARKET · 装备流转</text>
+        <text class="hero-title">二手交易</text>
+        <text class="hero-sub">全新与二手闲置装备，拍照即可上架</text>
+    </view>
+
+    <view class="card notice-card" wx:if="{{!canView}}">
+        <view class="row between">
+            <text class="strong">访客浏览 · 内容概览</text>
+        </view>
+        <text class="card-desc">所有模块已开放浏览，可以先看看有哪些雪具；{{actHint}}</text>
+        <view class="btn-row">
+            <button wx:if="{{guest}}" class="btn btn-primary btn-sm" bindtap="onLogin">登录 / 注册</button>
+            <button wx:else class="btn btn-plain btn-sm" bindtap="onLogin">查看审核状态</button>
+        </view>
+    </view>
+
+    <view class="filters">
+        <view class="filter-item {{condition === 'all' ? 'filter-on' : ''}}" data-value="all" bindtap="onCondition">全部</view>
+        <view class="filter-item {{condition === 'new' ? 'filter-on' : ''}}" data-value="new" bindtap="onCondition">全新</view>
+        <view class="filter-item {{condition === 'used' ? 'filter-on' : ''}}" data-value="used" bindtap="onCondition">二手闲置</view>
+    </view>
+
+    <scroll-view scroll-x class="scroll-filters">
+        <view class="filter-item {{category === item ? 'filter-on' : ''}} chip-muted" wx:for="{{categories}}" wx:key="*this" data-value="{{item}}" bindtap="onCategory">{{item}}</view>
+    </scroll-view>
+
+    <view wx:if="{{loading}}" class="state">正在加载云端数据…</view>
+    <view wx:elif="{{error}}" class="state">
+        <text class="state-title">加载失败</text>
+        <text>{{error}}</text>
+        <view class="state-action" bindtap="load">重新加载</view>
+    </view>
+    <view wx:elif="{{list.length === 0}}" class="state">
+        <text class="state-title">还没有装备上架</text>
+        <text>点右下角按钮发布第一件雪具</text>
+    </view>
+
+    <view wx:else>
+        <view class="card" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="onOpen">
+            <view class="row">
+                <image class="gear-cover" wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" />
+                <view wx:else class="gear-cover gear-cover-empty">
+                    <image class="cover-ico" src="/assets/ico-tag.png" mode="aspectFit" />
+                </view>
+                <view class="gear-main">
+                    <text class="gear-title">{{item.title}}</text>
+                    <text class="gear-sub">{{item.category}} · {{item.conditionText}}</text>
+                    <view class="chip-row">
+                        <text class="chip">{{item.statusText}}</text>
+                        <text class="chip chip-muted">{{item.tradePlaceText}}</text>
+                    </view>
+                </view>
+            </view>
+            <view class="card-foot">
+                <text class="price">¥{{item.priceText}}<text class="price-unit" wx:if="{{item.originalText}}"> 原价 ¥{{item.originalText}}</text></text>
+                <image class="ico" src="/assets/ico-arrow.png" mode="aspectFit" />
+            </view>
+        </view>
+    </view>
+
+    <view class="fab" bindtap="onPublish">
+        <text class="fab-plus">＋</text>
+        <text>发布装备</text>
+    </view>
+    </block>
+</view>

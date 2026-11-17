@@ -1,0 +1,14 @@
+# 依赖
+node_modules/
+
+# 微信开发者工具个人配置（含本机设置/私有 appid）
+project.private.config.json
+
+# WorkBuddy 项目数据与云应用标识
+.workbuddy/
+.wbapp_*
+
+# 系统与日志
+.DS_Store
+Thumbs.db
+*.log

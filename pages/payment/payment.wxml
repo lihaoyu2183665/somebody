@@ -1,0 +1,92 @@
+<view class="page page-no-tab">
+    <access-gate wx:if="{{gate}}" gate="{{gate}}" bind:refresh="onRefresh" />
+    <block wx:else>
+    <view wx:if="{{loading}}" class="state">正在加载支付接入状态…</view>
+    <view wx:elif="{{error}}" class="state">
+        <text class="state-title">加载失败</text>
+        <text>{{error}}</text>
+        <view class="state-action" bindtap="load">重新加载</view>
+    </view>
+
+    <view wx:else>
+        <view class="hero hero-plain">
+            <text class="hero-kicker">PAYMENT · 参团收款</text>
+            <text class="hero-title">收款与支付接入</text>
+            <text class="hero-sub">收款信息统一维护，报名订单状态实时可见</text>
+        </view>
+
+        <view class="card notice-card">
+            <view class="row between">
+                <text class="strong">{{gateway.name}}</text>
+                <text class="chip chip-warn">{{gateway.statusText}}</text>
+            </view>
+            <text class="card-desc">{{gateway.summary}}</text>
+            <view class="chip-row">
+                <text class="chip chip-muted">应用类型 {{gateway.appType}}</text>
+                <text class="chip chip-muted">绑定 {{gateway.bindingStatus}}</text>
+                <text class="chip chip-warn">支付参数未配置</text>
+            </view>
+            <text class="card-desc">在接入完成前，报名仍可正常下单：订单按线下收款登记，会员可提交付款信息，管理员在活动详情页确认收款后报名生效。</text>
+        </view>
+
+        <view class="section">
+            <text class="section-title"><text class="section-mark"></text>在线支付接入清单</text>
+        </view>
+        <view class="card" wx:for="{{checks}}" wx:key="key">
+            <view class="row between">
+                <text class="strong">{{item.order}}. {{item.label}}</text>
+                <text class="chip {{item.stateTone}}">{{item.stateText}}</text>
+            </view>
+            <text class="card-desc">{{item.detail}}</text>
+            <text class="card-desc">操作：{{item.action}}</text>
+        </view>
+
+        <view class="section">
+            <text class="section-title"><text class="section-mark"></text>俱乐部收款配置</text>
+        </view>
+        <block wx:if="{{isAdmin}}">
+            <view class="form-card">
+                <text class="form-title">管理员维护 · 保存后立即生效</text>
+                <view class="form-item">
+                    <text class="form-label">收款人 / 户名</text>
+                    <input class="form-input" value="{{payeeName}}" bindinput="onPayeeNameInput" placeholder="俱乐部对公账户或财务负责人" />
+                </view>
+                <view class="form-item">
+                    <text class="form-label">收款账号</text>
+                    <input class="form-input" value="{{payeeAccount}}" bindinput="onPayeeAccountInput" placeholder="银行卡号 / 收款码说明" />
+                </view>
+                <view class="form-item">
+                    <text class="form-label">收款联系方式</text>
+                    <input class="form-input" value="{{contact}}" bindinput="onContactInput" placeholder="财务微信 / 电话" />
+                </view>
+                <view class="form-item">
+                    <text class="form-label">默认线下收款说明</text>
+                    <textarea class="form-textarea" value="{{offlineNote}}" bindinput="onOfflineNoteInput" placeholder="转账时备注活动名称与会员姓名，付款后提交付款信息" />
+                </view>
+                <view class="form-item">
+                    <text class="form-label">接入进度备注</text>
+                    <textarea class="form-textarea" value="{{gatewayNote}}" bindinput="onGatewayNoteInput" placeholder="记录小程序绑定、支付参数配置、道具发布进度" />
+                </view>
+                <view class="form-item">
+                    <text class="form-label">俱乐部已登记在线支付条件</text>
+                    <switch checked="{{onlineEnabled}}" color="#3D78A8" bindchange="onOnlineChange" />
+                    <text class="form-hint">仅作接入准备登记，不会发起真实支付；平台侧未就绪时订单仍按线下收款执行。</text>
+                </view>
+            </view>
+            <text class="form-error" wx:if="{{error}}">{{error}}</text>
+            <view class="btn-row">
+                <button class="btn btn-primary" loading="{{saving}}" disabled="{{saving}}" bindtap="onSave">保存配置</button>
+                <button class="btn btn-plain" bindtap="onReset">恢复上次保存</button>
+            </view>
+            <view class="card mt-24">
+                <text class="card-desc">最近保存：{{updatedText}}。配置保存在云端数据库，关闭小程序后仍然存在。</text>
+            </view>
+        </block>
+        <view class="card mt-24">
+            <text class="section-title"><text class="section-mark"></text>订单与数据说明</text>
+            <text class="card-desc">每笔报名订单都包含价格类别、金额、实际收款渠道、支付状态与唯一业务单号；会员无法自行标记已支付，已支付订单也不能自行删除，收款状态只能由管理员确认或撤销。</text>
+            <text class="card-desc">业务单号已按支付平台规范生成（8–32 位、仅字母数字与指定符号、幂等唯一），完成小程序绑定与支付配置后即可用于在线支付下单。</text>
+        </view>
+    </view>
+    </block>
+</view>

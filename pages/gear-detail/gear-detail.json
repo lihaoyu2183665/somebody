@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "雪具详情",
+  "usingComponents": {
+    "access-gate": "../../components/access-gate/access-gate"
+  }
+}

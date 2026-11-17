@@ -1,0 +1,117 @@
+.gate {
+    padding: 36rpx 0 20rpx;
+    box-sizing: border-box;
+}
+
+.gate-card {
+    padding: 44rpx 36rpx 40rpx;
+    background: #F7FBFD;
+    border-radius: 30rpx;
+    box-shadow: 0 8rpx 30rpx rgba(60, 88, 110, 0.05);
+    box-sizing: border-box;
+}
+
+.gate-art {
+    display: block;
+    width: 200rpx;
+    height: 287rpx;
+    margin: 0 auto 24rpx;
+}
+
+.gate-kicker {
+    display: block;
+    font-size: 22rpx;
+    letter-spacing: 4rpx;
+    color: #3D78A8;
+}
+
+.gate-title {
+    display: block;
+    margin-top: 12rpx;
+    font-size: 42rpx;
+    font-weight: 700;
+    color: #374D62;
+}
+
+.gate-sub {
+    display: block;
+    margin-top: 10rpx;
+    font-size: 28rpx;
+    color: #3D78A8;
+}
+
+.gate-desc {
+    display: block;
+    margin-top: 24rpx;
+    font-size: 27rpx;
+    line-height: 1.75;
+    color: #6A8298;
+}
+
+.gate-steps {
+    margin: 32rpx 0 12rpx;
+    padding: 24rpx 26rpx;
+    background: #E9F3FA;
+    border-radius: 22rpx;
+}
+
+.gate-step {
+    display: flex;
+    align-items: center;
+    padding: 10rpx 0;
+}
+
+.gate-step-num {
+    width: 38rpx;
+    height: 38rpx;
+    line-height: 38rpx;
+    margin-right: 18rpx;
+    border-radius: 50%;
+    background: #3D78A8;
+    color: #FFFFFF;
+    font-size: 22rpx;
+    text-align: center;
+}
+
+.gate-step-text {
+    font-size: 26rpx;
+    color: #4A6076;
+}
+
+.gate-btn {
+    display: block;
+    width: 100%;
+    height: 92rpx;
+    line-height: 92rpx;
+    margin: 22rpx 0 0;
+    padding: 0;
+    border: none;
+    border-radius: 20rpx;
+    font-size: 30rpx;
+    font-weight: 600;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.gate-btn::after {
+    border: none;
+}
+
+.btn-primary.gate-btn {
+    background: #3D78A8;
+    color: #FFFFFF;
+}
+
+.btn-plain.gate-btn {
+    background: #E9F3FA;
+    color: #4A6076;
+}
+
+.gate-hint {
+    display: block;
+    margin-top: 22rpx;
+    font-size: 23rpx;
+    line-height: 1.6;
+    color: #8FA8BC;
+    text-align: center;
+}

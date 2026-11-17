@@ -1,0 +1,109 @@
+<view class="page page-no-tab">
+    <access-gate wx:if="{{gate}}" gate="{{gate}}" bind:refresh="onRefresh" />
+    <block wx:else>
+    <view class="hero hero-plain">
+        <text class="hero-kicker">ADMIN · MEMBERS</text>
+        <text class="hero-title">全部用户信息</text>
+        <text class="hero-sub">用户管理：查看完整档案、删除用户</text>
+    </view>
+
+    <view class="card">
+        <view class="stat-row">
+            <view class="stat-cell">
+                <text class="stat-num">{{counts.total}}</text>
+                <text class="stat-label">注册用户</text>
+            </view>
+            <view class="stat-cell">
+                <text class="stat-num">{{counts.admin}}</text>
+                <text class="stat-label">管理员</text>
+            </view>
+            <view class="stat-cell">
+                <text class="stat-num">{{counts.coach}}</text>
+                <text class="stat-label">教练</text>
+            </view>
+            <view class="stat-cell">
+                <text class="stat-num">{{counts.formal}}</text>
+                <text class="stat-label">正式用户</text>
+            </view>
+            <view class="stat-cell">
+                <text class="stat-num">{{counts.pending}}</text>
+                <text class="stat-label">待审核</text>
+            </view>
+        </view>
+        <text class="card-desc" wx:if="{{counts.draft > 0}}">其中 {{counts.draft}} 位用户尚未提交审核（资料待完善），填写完整基本信息并主动提交后才会进入审核中心。</text>
+        <text class="card-desc">仅管理员可查看：角色标签后的实名姓名，以及完整档案中的姓名、证件号、手机号等实名信息都只对管理员展示，教练与普通会员不可见。权限配色：俱乐部管理员红色、认证教练蓝色、正式用户黑色、普通会员（资料待完善 / 待审核 / 已驳回）灰色。实名信息中的身份证号完整展示；审批与提权请前往审核中心，参团人员名单请在活动详情页查看并按单个活动导出。</text>
+        <text class="card-desc">「删除用户」会永久删除该会员档案、权限等级与实名资料，操作不可恢复；删除后该用户下次微信登录需重新填写基本信息并再次提交审核，管理员通过后才能使用。历史参团订单、报名与收款记录保留作台账留档。本人账号与最后一名管理员不可删除。点击「删除用户」并在弹窗中确认后即刻生效，无需输入文字。</text>
+        <view class="btn-row btn-row-wrap">
+            <button class="btn btn-plain btn-sm" bindtap="onReview">前往审核中心</button>
+        </view>
+    </view>
+
+    <view class="filters filters-wrap">
+        <view wx:for="{{filters}}" wx:for-item="option" wx:key="value" class="filter-item {{filter === option.value ? 'filter-on' : ''}}" data-value="{{option.value}}" bindtap="onFilter">{{option.label}}</view>
+    </view>
+
+    <view wx:if="{{loading}}" class="state">正在加载全部用户信息…</view>
+    <view wx:elif="{{error}}" class="state">
+        <text class="state-title">加载失败</text>
+        <text>{{error}}</text>
+        <view class="state-action" bindtap="load">重新加载</view>
+    </view>
+    <view wx:elif="{{list.length === 0}}" class="state">
+        <text class="state-title">当前分类暂无用户</text>
+        <text>切换上方分类，或点「全部」查看所有注册用户</text>
+        <view class="state-action" bindtap="onRefresh">刷新列表</view>
+    </view>
+
+    <view wx:else>
+        <view class="card" wx:for="{{list}}" wx:key="key">
+            <view class="user-row">
+                <view class="avatar {{item.avatarClass}}">
+                    <image wx:if="{{item.avatarPhotoUrl}}" class="avatar-photo" src="{{item.avatarPhotoUrl}}" mode="aspectFill" />
+                    <text wx:else>{{item.avatarGlyph}}</text>
+                </view>
+                <view class="user-row-info">
+                    <text class="card-title">{{item.name}}</text>
+                    <text class="card-desc role-name" style="color:{{item.roleColor}}">{{isAdmin ? item.roleNameText : item.roleText}}</text>
+                    <text class="card-desc">{{item.statusText}} · {{item.timeText}}</text>
+                </view>
+            </view>
+            <view class="chip-row">
+                <text class="chip {{item.statusTone}}">{{item.statusText}}</text>
+                <text class="chip chip-muted" wx:if="{{item.isSelf}}">本人</text>
+                <text class="chip chip-muted" wx:if="{{isAdmin}}">手机号：{{item.phone}}</text>
+                <text class="chip chip-muted">{{item.level}}</text>
+            </view>
+
+            <view class="member-detail" wx:if="{{expandedId === item.id}}">
+                <text class="detail-title">完整注册信息</text>
+                <view class="detail-line"><text class="detail-key">会员编号</text><text class="detail-value">#{{item.id}}</text></view>
+                <view class="detail-line"><text class="detail-key">账号标识</text><text class="detail-value">{{item.detail.uid}}</text></view>
+                <view class="detail-line"><text class="detail-key">会员昵称</text><text class="detail-value">{{item.name}}</text></view>
+                <view class="detail-line"><text class="detail-key">微信昵称</text><text class="detail-value">{{item.detail.wxName}}</text></view>
+                <block wx:if="{{isAdmin}}">
+                    <view class="detail-line"><text class="detail-key">姓名</text><text class="detail-value">{{item.detail.realName}}</text></view>
+                    <view class="detail-line"><text class="detail-key">身份证号</text><text class="detail-value">{{item.detail.idCard}}</text></view>
+                    <view class="detail-line"><text class="detail-key">性别</text><text class="detail-value">{{item.detail.gender}}</text></view>
+                    <view class="detail-line"><text class="detail-key">手机号</text><text class="detail-value">{{item.phone}}</text></view>
+                </block>
+                <view class="detail-line"><text class="detail-key">滑雪水平</text><text class="detail-value">{{item.level}}</text></view>
+                <view class="detail-line"><text class="detail-key">头像</text><text class="detail-value">{{item.detail.avatarType}}</text></view>
+                <view class="detail-line"><text class="detail-key">权限角色</text><text class="detail-value role-name" style="color:{{item.roleColor}}">{{item.detail.role}}</text></view>
+                <view class="detail-line"><text class="detail-key">审核状态</text><text class="detail-value">{{item.detail.status}}</text></view>
+                <view class="detail-line"><text class="detail-key">基本信息</text><text class="detail-value">{{item.detail.profileComplete}}</text></view>
+                <view class="detail-line"><text class="detail-key">注册时间</text><text class="detail-value">{{item.detail.registeredAt}}</text></view>
+                <view class="detail-line"><text class="detail-key">提交审核时间</text><text class="detail-value">{{item.detail.submittedAt}}</text></view>
+                <view class="detail-line"><text class="detail-key">最近审核时间</text><text class="detail-value">{{item.detail.reviewedAt}}</text></view>
+                <view class="detail-line"><text class="detail-key">审核意见</text><text class="detail-value">{{item.detail.reviewNote}}</text></view>
+            </view>
+
+            <view class="btn-row btn-row-wrap">
+                <button class="btn btn-plain btn-sm" data-id="{{item.id}}" bindtap="onToggleDetail">{{expandedId === item.id ? '收起资料' : '查看完整资料'}}</button>
+                <button class="btn btn-primary btn-sm" bindtap="onReview">前往审核中心</button>
+                <button class="btn btn-danger btn-sm" wx:if="{{item.canDelete}}" data-id="{{item.id}}" data-name="{{item.name}}" bindtap="onDeleteMember">删除用户</button>
+            </view>
+        </view>
+        <view class="state-action" bindtap="onRefresh">刷新列表</view>
+    </view>
+    </block>
+</view>

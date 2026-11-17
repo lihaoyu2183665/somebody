@@ -1,0 +1,105 @@
+<view class="page page-no-tab">
+    <view class="hero hero-plain">
+        <text class="hero-kicker">会员资料</text>
+        <text class="hero-title">完善你的档案</text>
+        <text class="hero-sub">基本信息填写完整后才能提交审核，实名信息可在参团报名时一键调用</text>
+    </view>
+
+    <view class="form-card">
+        <text class="form-title">审核进度</text>
+        <view class="review-tip" wx:if="{{memberStatus === 'draft'}}">注册已成功，申请尚未提交。请把下方基本信息全部填写完整，再点「提交审核」；管理员只会看到已提交且资料完整的申请。</view>
+        <view class="review-tip" wx:elif="{{memberStatus === 'pending'}}">申请已提交，等待管理员审核。审核期间可以撤回申请继续修改资料，修改后重新提交即可。</view>
+        <view class="review-tip" wx:elif="{{memberStatus === 'rejected'}}">审核未通过，请按管理员意见修改资料，确认清单全部完成后重新提交审核。</view>
+        <view class="review-tip" wx:else>你已是正式会员。保持基本信息完整，报名俱乐部参团时可直接调用。</view>
+        <text class="form-label">提交审核前需完成</text>
+        <view class="check-list">
+            <view class="check-item" wx:for="{{reviewChecklist}}" wx:key="key">
+                <text class="check-label">{{item.label}}</text>
+                <text class="check-state {{item.done ? 'check-done' : ''}}">{{item.done ? '已填写' : '待补充'}}</text>
+            </view>
+        </view>
+        <text class="form-hint">{{reviewHint}}</text>
+        <text class="form-hint">必填项：昵称、姓名、身份证号、手机号、性别、滑雪水平；全部填写完整后才能提交审核。</text>
+        <text class="form-hint" wx:if="{{submittedAtText}}">提交审核时间：{{submittedAtText}}</text>
+        <view class="btn-row btn-row-wrap mt-16" wx:if="{{memberStatus === 'draft' || memberStatus === 'rejected'}}">
+            <button class="btn btn-primary btn-sm" loading="{{reviewSubmitting}}" disabled="{{reviewSubmitting}}" bindtap="onSubmitReview">提交审核</button>
+        </view>
+        <view class="btn-row btn-row-wrap mt-16" wx:if="{{memberStatus === 'pending'}}">
+            <button class="btn btn-plain btn-sm" loading="{{reviewSubmitting}}" disabled="{{reviewSubmitting}}" bindtap="onWithdraw">撤回申请</button>
+        </view>
+    </view>
+
+    <view class="form-card">
+        <text class="form-title">我的头像</text>
+        <text class="form-hint">在这里选用内置卡通头像，也可以上传一张照片作为自己的头像。设置后立即保存在云端，重新打开小程序依然生效。</text>
+        <view class="avatar-current">
+            <view class="avatar avatar-lg {{avatarClass}}">
+                <image wx:if="{{avatarPhotoUrl}}" class="avatar-photo" src="{{avatarPhotoUrl}}" mode="aspectFill" />
+                <text wx:else>{{avatarGlyph}}</text>
+            </view>
+            <view class="avatar-current-info">
+                <text class="form-label">当前头像</text>
+                <text class="form-hint">{{avatarHint}}</text>
+            </view>
+        </view>
+        <text class="form-label">卡通头像</text>
+        <view class="avatar-grid">
+            <view wx:for="{{artPresets}}" wx:key="key" class="avatar-option {{avatar === item.key ? 'avatar-option-on' : ''}}" data-key="{{item.key}}" bindtap="onPickPreset">
+                <view class="avatar">
+                    <image class="avatar-photo" src="{{item.image}}" mode="aspectFill" />
+                </view>
+            </view>
+        </view>
+        <view class="btn-row btn-row-wrap">
+            <button class="btn btn-ghost btn-sm" loading="{{uploading}}" disabled="{{uploading}}" bindtap="onUploadAvatar">上传照片作为头像</button>
+            <button class="btn btn-plain btn-sm" wx:if="{{avatar}}" bindtap="onResetAvatar">恢复默认</button>
+        </view>
+    </view>
+
+    <view class="form-card">
+        <text class="form-title">实名信息</text>
+        <text class="form-hint">姓名、身份证号、手机号与性别会保存在你的云端会员档案中，也是提交会员审核的必填项。报名俱乐部参团时可一键调用填写，管理员用于核对参团名单与购买保险。</text>
+        <view class="form-item">
+            <text class="form-label">姓名 <text class="form-required">*</text></text>
+            <input class="form-input" value="{{realName}}" bindinput="onRealNameInput" placeholder="与证件一致的真实姓名" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">身份证号 <text class="form-required">*</text></text>
+            <input class="form-input" value="{{idCardNo}}" bindinput="onIdCardInput" placeholder="18 位身份证号，末位可为 X" maxlength="18" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">手机号 <text class="form-required">*</text></text>
+            <input class="form-input" type="number" value="{{phone}}" bindinput="onPhoneInput" placeholder="用于活动联络" maxlength="11" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">性别 <text class="form-required">*</text></text>
+            <picker mode="selector" range="{{genderLabels}}" value="{{genderIndex}}" bindchange="onGenderChange">
+                <view class="form-picker">{{genderLabels[genderIndex]}}<text class="muted">›</text></view>
+            </picker>
+        </view>
+        <text class="form-hint">{{profileHint}}。证件号仅本人与俱乐部管理员可见，管理员查看与导出名单时均为完整号码。</text>
+    </view>
+
+    <view class="form-card">
+        <text class="form-title">基础信息</text>
+        <view class="form-item">
+            <text class="form-label">昵称 <text class="form-required">*</text></text>
+            <input class="form-input" value="{{displayName}}" bindinput="onDisplayNameInput" placeholder="雪友昵称" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">滑雪水平 <text class="form-required">*</text></text>
+            <picker mode="selector" range="{{levelLabels}}" value="{{levelIndex}}" bindchange="onLevelChange">
+                <view class="form-picker">{{levelText}}<text class="muted">›</text></view>
+            </picker>
+        </view>
+        <view class="form-item">
+            <text class="form-label">当前权限</text>
+            <text class="info-value role-name" style="color:{{roleColor}}">{{roleText}}</text>
+            <text class="form-hint">{{statusHint}}</text>
+        </view>
+    </view>
+
+    <text class="form-error" wx:if="{{error}}">{{error}}</text>
+    <button class="btn btn-primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="onSubmit">保存资料</button>
+    <text class="form-hint save-hint">保存资料不会自动提交审核。请确认上方清单全部完成后，点「提交审核」把申请交给管理员。</text>
+</view>

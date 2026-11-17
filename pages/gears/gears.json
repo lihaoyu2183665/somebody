@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "雪具交易市场",
+  "usingComponents": {
+    "access-gate": "../../components/access-gate/access-gate"
+  }
+}

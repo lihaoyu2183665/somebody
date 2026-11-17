@@ -1,0 +1,22 @@
+<view class="gate">
+    <view class="gate-card">
+        <image class="gate-art" src="/assets/brand-logo.png" mode="aspectFit" />
+        <text class="gate-kicker">MEMBER ACCESS</text>
+        <text class="gate-title">{{gate.title}}</text>
+        <text class="gate-sub">{{gate.subtitle}}</text>
+        <text class="gate-desc">{{gate.desc}}</text>
+
+        <view class="gate-steps" wx:if="{{gate.steps.length > 0}}">
+            <view class="gate-step" wx:for="{{gate.steps}}" wx:key="*this">
+                <text class="gate-step-num">{{index + 1}}</text>
+                <text class="gate-step-text">{{item}}</text>
+            </view>
+        </view>
+
+        <button class="btn btn-primary gate-btn" bindtap="onPrimary">{{gate.primaryText}}</button>
+        <button class="btn btn-plain gate-btn" wx:if="{{gate.showProfile}}" bindtap="onProfile">完善会员资料</button>
+        <text class="gate-hint" wx:if="{{gate.showRefresh}}">审核由俱乐部管理员完成，状态会自动同步</text>
+        <text class="gate-hint" wx:if="{{gate.showEdit}}">资料保存在云端，可随时回来继续填写</text>
+        <text class="gate-hint" wx:if="{{gate.showLogin}}">所有会员资料与发布内容保存在云端</text>
+    </view>
+</view>

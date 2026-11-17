@@ -1,0 +1,105 @@
+<view class="page page-no-tab">
+    <view class="review-tip">提交后需管理员审核，通过才会对外展示；修改内容会重新进入审核。</view>
+    <view class="hero hero-plain">
+        <text class="hero-kicker">发布 · 编辑</text>
+        <text class="hero-title">{{isEdit ? '编辑出行信息' : '发布拼车 / 拼搭子'}}</text>
+        <text class="hero-sub">把时间、地点和费用说清楚，搭子自然来</text>
+    </view>
+
+    <view class="form-card">
+        <text class="form-title">基础信息</text>
+        <view class="form-item">
+            <text class="form-label">信息类型 <text class="form-required">*</text></text>
+            <picker mode="selector" range="{{kindLabels}}" value="{{kindIndex}}" bindchange="onKindChange">
+                <view class="form-picker">{{kindText}}<text class="muted">›</text></view>
+            </picker>
+        </view>
+        <view class="form-item">
+            <text class="form-label">标题 <text class="form-required">*</text></text>
+            <input class="form-input" value="{{title}}" bindinput="onTitleInput" placeholder="例如：周六崇礼拼车，还剩 2 位" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">目的雪场</text>
+            <input class="form-input" value="{{resort}}" bindinput="onResortInput" placeholder="例如：万龙滑雪场" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">发布状态</text>
+            <picker mode="selector" range="{{statusLabels}}" value="{{statusIndex}}" bindchange="onStatusChange">
+                <view class="form-picker">{{statusText}}<text class="muted">›</text></view>
+            </picker>
+        </view>
+    </view>
+
+    <view class="form-card">
+        <text class="form-title">出发与返程</text>
+        <view class="form-line">
+            <view class="form-item">
+                <text class="form-label">出发日期 <text class="form-required">*</text></text>
+                <picker mode="date" value="{{departDate}}" bindchange="onDepartDate">
+                    <view class="form-picker">{{departDate}}<text class="muted">›</text></view>
+                </picker>
+            </view>
+            <view class="form-item">
+                <text class="form-label">出发时间</text>
+                <picker mode="time" value="{{departTime}}" bindchange="onDepartTime">
+                    <view class="form-picker">{{departTime}}<text class="muted">›</text></view>
+                </picker>
+            </view>
+        </view>
+        <view class="form-line">
+            <view class="form-item">
+                <text class="form-label">返程日期 <text class="form-required">*</text></text>
+                <picker mode="date" value="{{returnDate}}" bindchange="onReturnDate">
+                    <view class="form-picker">{{returnDate}}<text class="muted">›</text></view>
+                </picker>
+            </view>
+            <view class="form-item">
+                <text class="form-label">返程时间</text>
+                <picker mode="time" value="{{returnTime}}" bindchange="onReturnTime">
+                    <view class="form-picker">{{returnTime}}<text class="muted">›</text></view>
+                </picker>
+            </view>
+        </view>
+        <view class="form-item">
+            <text class="form-label">出发地点 <text class="form-required">*</text></text>
+            <input class="form-input" value="{{departPlace}}" bindinput="onDepartPlaceInput" placeholder="例如：地铁 10 号线芍药居站" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">返程地点</text>
+            <input class="form-input" value="{{returnPlace}}" bindinput="onReturnPlaceInput" placeholder="例如：原路返回 / 雪场停车场" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">出行方式 <text class="form-required">*</text></text>
+            <picker mode="selector" range="{{transports}}" value="{{transportIndex}}" bindchange="onTransportChange">
+                <view class="form-picker">{{transportText}}<text class="muted">›</text></view>
+            </picker>
+        </view>
+        <view class="form-item">
+            <text class="form-label">可拼人数</text>
+            <input class="form-input" type="number" value="{{seats}}" bindinput="onSeatsInput" placeholder="2" />
+        </view>
+    </view>
+
+    <view class="form-card">
+        <text class="form-title">费用与行程</text>
+        <view class="form-item">
+            <text class="form-label">费用分摊规则</text>
+            <textarea class="form-textarea" value="{{feeRule}}" bindinput="onFeeRuleInput" placeholder="例如：油费过路费按人数 AA，车主不摊；雪票各自购买" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">行程说明</text>
+            <textarea class="form-textarea" value="{{itinerary}}" bindinput="onItineraryInput" placeholder="例如：07:00 集合出发，10:30 到雪场，16:30 集合返程" />
+        </view>
+        <view class="form-item">
+            <text class="form-label">联系方式</text>
+            <input class="form-input" value="{{contact}}" bindinput="onContactInput" placeholder="微信号 / 手机号（报名者可见）" />
+        </view>
+    </view>
+
+    <text class="form-error" wx:if="{{error}}">{{error}}</text>
+
+    <button class="btn btn-primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="onSubmit">{{isEdit ? '保存修改' : '立即发布'}}</button>
+    <view class="mt-24" wx:if="{{isEdit}}">
+        <button class="btn btn-danger" bindtap="onDelete">删除这条信息</button>
+    </view>
+</view>

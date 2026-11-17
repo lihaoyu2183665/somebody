@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "管理员 · 发布出游活动",
+  "usingComponents": {
+    "access-gate": "../../components/access-gate/access-gate"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "教练资料与时段",
+  "usingComponents": {
+    "access-gate": "../../components/access-gate/access-gate",
+    "avatar-picker": "../../components/avatar-picker/avatar-picker"
+  }
+}

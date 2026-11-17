@@ -1,0 +1,12 @@
+<view class="page page-no-tab login-wrap">
+    <view class="login-logo">
+        <image src="/assets/brand-logo.png" mode="aspectFit" />
+    </view>
+    <text class="login-title">雪域俱乐部</text>
+    <text class="login-sub">找搭子 · 参团出行 · 约教练 · 淘雪具</text>
+
+    <button class="btn btn-primary" loading="{{wechatLoading}}" disabled="{{wechatLoading}}" bindtap="onWechatLogin">微信授权登录</button>
+    <text class="form-error" wx:if="{{error}}">{{error}}</text>
+
+    <text class="login-tip-text">使用微信授权登录，首次登录会创建会员档案。请填写完整基本信息（昵称、姓名、身份证号、手机号、性别、滑雪水平）并主动提交审核；管理员通过后升级为正式会员，方可查看各分项目内容、发布信息与报名。</text>
+</view>

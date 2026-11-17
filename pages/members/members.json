@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "全部用户信息",
+  "usingComponents": {
+    "access-gate": "../../components/access-gate/access-gate"
+  }
+}

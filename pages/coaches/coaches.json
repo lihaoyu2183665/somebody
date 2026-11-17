@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "教练授课平台",
+  "usingComponents": {
+    "access-gate": "../../components/access-gate/access-gate"
+  }
+}

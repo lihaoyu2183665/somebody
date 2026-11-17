@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "出游活动详情",
+  "usingComponents": {
+    "access-gate": "../../components/access-gate/access-gate"
+  }
+}

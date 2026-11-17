@@ -1,0 +1,71 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/trips/trips",
+    "pages/coaches/coaches",
+    "pages/gears/gears",
+    "pages/mine/mine",
+    "pages/login/login",
+    "pages/carpool-detail/carpool-detail",
+    "pages/carpool-edit/carpool-edit",
+    "pages/trip-detail/trip-detail",
+    "pages/trip-edit/trip-edit",
+    "pages/gear-detail/gear-detail",
+    "pages/gear-edit/gear-edit",
+    "pages/coach-detail/coach-detail",
+    "pages/coach-edit/coach-edit",
+    "pages/member-edit/member-edit",
+    "pages/my-records/my-records",
+    "pages/admin/admin",
+    "pages/members/members",
+    "pages/payment/payment"
+  ],
+  "window": {
+    "navigationBarTitleText": "雪域俱乐部",
+    "navigationBarBackgroundColor": "#E9F3FA",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#E9F3FA",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#8FA8BC",
+    "selectedColor": "#3D78A8",
+    "backgroundColor": "#F7FBFD",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "滑雪搭子",
+        "iconPath": "assets/tab-buddy.png",
+        "selectedIconPath": "assets/tab-buddy-on.png"
+      },
+      {
+        "pagePath": "pages/trips/trips",
+        "text": "俱乐部参团",
+        "iconPath": "assets/tab-trip.png",
+        "selectedIconPath": "assets/tab-trip-on.png"
+      },
+      {
+        "pagePath": "pages/coaches/coaches",
+        "text": "教练平台",
+        "iconPath": "assets/tab-coach.png",
+        "selectedIconPath": "assets/tab-coach-on.png"
+      },
+      {
+        "pagePath": "pages/gears/gears",
+        "text": "二手交易",
+        "iconPath": "assets/tab-gear.png",
+        "selectedIconPath": "assets/tab-gear-on.png"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的",
+        "iconPath": "assets/tab-mine.png",
+        "selectedIconPath": "assets/tab-mine-on.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

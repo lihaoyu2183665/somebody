@@ -1,0 +1,18 @@
+<view class="ap-mask" wx:if="{{show}}" bindtap="onClose">
+    <view class="ap-sheet" catchtap="onNoop">
+        <view class="ap-head">
+            <text class="ap-title">{{title}}</text>
+            <text class="ap-close" bindtap="onClose">关闭</text>
+        </view>
+        <text class="ap-hint">点选任意头像即可更换，也可以上传自己的照片。</text>
+        <view class="ap-grid">
+            <view wx:for="{{presets}}" wx:key="key" class="ap-item {{value === item.key ? 'ap-item-on' : ''}}" data-key="{{item.key}}" bindtap="onPick">
+                <image class="ap-img" src="{{item.image}}" mode="aspectFill" />
+            </view>
+        </view>
+        <view class="ap-actions">
+            <button class="ap-btn ap-btn-primary" loading="{{uploading}}" disabled="{{uploading}}" bindtap="onUpload">上传照片作为头像</button>
+            <button class="ap-btn ap-btn-plain" wx:if="{{value}}" bindtap="onReset">恢复默认</button>
+        </view>
+    </view>
+</view>
