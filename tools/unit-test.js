@@ -1176,6 +1176,31 @@ assert.deepStrictEqual(
         && guard.gateData('guest').desc.indexOf('查看详细信息') >= 0,
         'guest gate copy reflects public browsing and gated details');
 
+    // 报名风险告知：提交报名前弹出告知书，勾选确认后才真正生成订单。
+    const riskLogic = fs.readFileSync(path.join(root, 'pages/trip-detail/trip-detail.js'), 'utf8');
+    const riskView = fs.readFileSync(path.join(root, 'pages/trip-detail/trip-detail.wxml'), 'utf8');
+    const riskStyle = fs.readFileSync(path.join(root, 'pages/trip-detail/trip-detail.wxss'), 'utf8');
+    const riskStart = riskLogic.indexOf('const RISK_LINES');
+    const riskBlock = riskLogic.slice(riskStart, riskLogic.indexOf('];', riskStart));
+    check(riskBlock.split('\n').filter(line => line.trim().charAt(0) === "'").length === 7
+        && riskBlock.indexOf('滑雪属于高风险体育运动') >= 0
+        && riskBlock.indexOf('本人已经完整阅读并理解全部风险提示') >= 0,
+        'risk notice contains all seven disclosure clauses');
+    check(riskView.indexOf('滑雪活动风险告知书') >= 0
+        && riskView.indexOf('wx:for="{{riskLines}}"') >= 0
+        && riskView.indexOf('我已阅读并自愿承担以上风险') >= 0
+        && riskView.indexOf('bindtap="onRiskToggle"') >= 0
+        && riskView.indexOf('bindtap="onAgreeRisk"') >= 0
+        && riskView.indexOf('bindtap="onCloseRisk"') >= 0,
+        'signup shows a checkbox-gated risk notice before ordering');
+    check(riskLogic.indexOf('this.setData({ riskVisible: true, riskAgreed: false })') >= 0
+        && riskLogic.indexOf('if (!this.data.riskAgreed)') >= 0
+        && riskLogic.indexOf("ui.toast('请先阅读并勾选") >= 0
+        && riskLogic.indexOf("api.create('trip_orders'") >= 0,
+        'order is created only after the risk checkbox is confirmed');
+    check(riskStyle.indexOf('.risk-panel') >= 0 && riskStyle.indexOf('.risk-checkbox-on') >= 0,
+        'risk notice has dedicated panel and checkbox styles');
+
     // 高级管理员：唯一最高层级，继承全部管理员能力，档案对其他用户不可见。
     const hierarchyGuard = fs.readFileSync(path.join(root, 'utils/guard.js'), 'utf8');
     const hierarchyMine = fs.readFileSync(path.join(root, 'pages/mine/mine.js'), 'utf8');
@@ -1203,7 +1228,7 @@ assert.deepStrictEqual(
     const ordinaryAdminAccess = await guard.access();
     eq(ordinaryAdminAccess.isSuperAdmin, false, 'ordinary admin is not super admin');
 
-    console.log(`PASS ${passed} 项工具函数、四级权限、提交审核门禁、角色配色、仅卡通头像、教练头像可更换与无名称标签、我的页无自定义头像入口、四大模块照片背景、实名资料、Excel 导出、报名人员名单、管理员报名、快捷入口、单一微信授权登录、收款与支付管理员专属、用户删除与重新注册、角色后实名姓名、雪狸品牌 LOGO 展示、护眼淡蓝主题、底部按钮式导航、报名人员点击详情与三要素权限、全站导出下线、我的页头像唯一入口、支付状态机、全模块访客概览与详情门禁、高级管理员层级、合规断言`);
+    console.log(`PASS ${passed} 项工具函数、四级权限、提交审核门禁、角色配色、仅卡通头像、教练头像可更换与无名称标签、我的页无自定义头像入口、四大模块照片背景、实名资料、Excel 导出、报名人员名单、管理员报名、快捷入口、单一微信授权登录、收款与支付管理员专属、用户删除与重新注册、角色后实名姓名、雪狸品牌 LOGO 展示、护眼淡蓝主题、底部按钮式导航、报名人员点击详情与三要素权限、全站导出下线、我的页头像唯一入口、支付状态机、全模块访客概览与详情门禁、高级管理员层级、报名风险告知、合规断言`);
 })().catch(error => {
     console.error('FAIL', error.message);
     process.exit(1);

@@ -94,6 +94,17 @@ function promptText(title, placeholder) {
     });
 }
 
+// 报名前的风险告知条款，集中维护；页面按序渲染，确认报名前必须逐条阅读并勾选同意。
+const RISK_LINES = [
+    '滑雪属于高风险体育运动，存在摔倒、碰撞、骨折等受伤甚至死亡的固有风险；',
+    '本次为体育活动拼团，不是旅游组团；发起方不承诺全程无意外；',
+    '本人确认身体健康，无心脏病、高血压等不适合滑雪的疾病；',
+    '本人知晓应当购买滑雪专项意外伤害保险；',
+    '本人将遵守雪场规则、听从现场工作人员提示，规范佩戴护具；',
+    '因本人自身行为、装备问题、运动固有风险造成的损害，按法律规定划分责任；',
+    '本人已经完整阅读并理解全部风险提示，自愿报名参加本次拼团活动。',
+];
+
 Page({
     data: {
         id: null,
@@ -129,6 +140,9 @@ Page({
         canAct: false,
         guest: false,
         actHint: '',
+        riskVisible: false,
+        riskAgreed: false,
+        riskLines: RISK_LINES,
     },
 
     onLoad(options) {
@@ -431,7 +445,46 @@ Page({
             ui.toast(invalid);
             return;
         }
-        this.setData({ submitting: true });
+        // 表单校验通过后才弹风险告知书；真正的落库由确认按钮 onAgreeRisk 完成。
+        this.setData({ riskVisible: true, riskAgreed: false });
+    },
+
+    onRiskToggle() {
+        this.setData({ riskAgreed: !this.data.riskAgreed });
+    },
+
+    onCloseRisk() {
+        this.setData({ riskVisible: false, riskAgreed: false });
+    },
+
+    async onAgreeRisk() {
+        if (this.data.submitting) return;
+        if (!this.data.riskAgreed) {
+            ui.toast('请先阅读并勾选「我已阅读并自愿承担以上风险」');
+            return;
+        }
+        // 弹窗打开期间页面可能重新加载，这里再取一次价格档位，避免凭空下单。
+        const option = this.data.options.find(row => row.id === this.data.selectedId);
+        if (!option || !this.data.trip) {
+            this.onCloseRisk();
+            ui.toast('价格类别已变化，请重新选择');
+            return;
+        }
+        const quantity = Number(this.data.quantity);
+        const realName = this.data.realName.trim();
+        const idCardNo = profile.normalizeIdCard(this.data.idCardNo);
+        const phone = this.data.phone.trim();
+        const gender = (profile.GENDERS[this.data.genderIndex] || {}).value || '';
+        const invalid = !gender ? '请选择性别（男 / 女）'
+            : profile.validateRealName(realName)
+                || profile.validatePhone(phone)
+                || profile.validateIdCard(idCardNo);
+        if (invalid) {
+            this.onCloseRisk();
+            ui.toast(invalid);
+            return;
+        }
+        this.setData({ riskVisible: false, submitting: true });
         // 参团人信息随订单落库为快照：管理员台账与导出表格读的是提交当时的真实资料。
         const result = await api.create('trip_orders', {
             trip_id: this.data.id,
@@ -458,7 +511,7 @@ Page({
             return;
         }
         ui.success('报名成功，请联系俱乐部管理员完成付款确认');
-        this.setData({ note: '' });
+        this.setData({ note: '', riskAgreed: false });
         this.load();
     },
 

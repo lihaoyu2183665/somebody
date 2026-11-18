@@ -247,6 +247,28 @@
         <button class="btn btn-neutral" wx:else>报名已结束</button>
     </view>
 
+    <view class="risk-mask" wx:if="{{riskVisible}}" bindtap="onCloseRisk"></view>
+    <view class="risk-panel" wx:if="{{riskVisible}}">
+        <view class="risk-head">
+            <text class="risk-title">滑雪活动风险告知书</text>
+            <text class="risk-close" bindtap="onCloseRisk">✕</text>
+        </view>
+        <scroll-view class="risk-body" scroll-y>
+            <view class="risk-line" wx:for="{{riskLines}}" wx:key="*this">
+                <text class="risk-index">{{index + 1}}.</text>
+                <text class="risk-text">{{item}}</text>
+            </view>
+        </scroll-view>
+        <view class="risk-agree" bindtap="onRiskToggle">
+            <view class="risk-checkbox {{riskAgreed ? 'risk-checkbox-on' : ''}}">{{riskAgreed ? '✓' : ''}}</view>
+            <text class="risk-agree-text">我已阅读并自愿承担以上风险</text>
+        </view>
+        <view class="btn-row">
+            <button class="btn btn-plain" bindtap="onCloseRisk">取消</button>
+            <button class="btn btn-primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="onAgreeRisk">确认并报名</button>
+        </view>
+    </view>
+
     <view class="person-mask" wx:if="{{detailPerson}}" bindtap="onClosePerson"></view>
     <view class="person-panel" wx:if="{{detailPerson}}">
         <view class="person-panel-head">
