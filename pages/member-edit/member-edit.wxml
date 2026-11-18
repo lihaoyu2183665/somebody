@@ -6,6 +6,19 @@
     </view>
 
     <view class="form-card">
+        <text class="form-title">用户服务协议</text>
+        <text class="form-hint">{{agreementIntro}}</text>
+        <view class="row between mt-16">
+            <text class="info-label">同意状态</text>
+            <text class="chip {{termsAgreedAtText ? 'chip-ok' : 'chip-warn'}}">{{termsAgreedAtText ? '已同意 ' + termsAgreedAtText : '尚未同意'}}</text>
+        </view>
+        <text class="form-hint" wx:if="{{!termsAgreedAtText}}">需勾选同意后方可完善资料与使用小程序。</text>
+        <view class="btn-row btn-row-wrap mt-16">
+            <button class="btn btn-plain btn-sm" bindtap="onOpenAgreement">阅读协议全文</button>
+        </view>
+    </view>
+
+    <view class="form-card">
         <text class="form-title">审核进度</text>
         <view class="review-tip" wx:if="{{memberStatus === 'draft'}}">注册已成功，申请尚未提交。请把下方基本信息全部填写完整，再点「提交审核」；管理员只会看到已提交且资料完整的申请。</view>
         <view class="review-tip" wx:elif="{{memberStatus === 'pending'}}">申请已提交，等待管理员审核。审核期间可以撤回申请继续修改资料，修改后重新提交即可。</view>
@@ -102,4 +115,26 @@
     <text class="form-error" wx:if="{{error}}">{{error}}</text>
     <button class="btn btn-primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="onSubmit">保存资料</button>
     <text class="form-hint save-hint">保存资料不会自动提交审核。请确认上方清单全部完成后，点「提交审核」把申请交给管理员。</text>
+
+    <view class="agreement-mask" wx:if="{{agreementVisible}}"></view>
+    <view class="agreement-panel" wx:if="{{agreementVisible}}">
+        <view class="agreement-head">
+            <text class="agreement-title">{{agreementTitle}}</text>
+        </view>
+        <scroll-view class="agreement-body" scroll-y>
+            <text class="agreement-intro">{{agreementIntro}}</text>
+            <view class="agreement-section" wx:for="{{agreementSections}}" wx:key="title">
+                <text class="agreement-section-title">{{item.title}}</text>
+                <text class="agreement-line {{line.sub ? 'agreement-sub' : ''}}" wx:for="{{item.lines}}" wx:for-item="line" wx:key="text">{{line.text}}</text>
+            </view>
+        </scroll-view>
+        <view class="agreement-agree" bindtap="onAgreementToggle">
+            <view class="agreement-checkbox {{agreementChecked ? 'agreement-checkbox-on' : ''}}">{{agreementChecked ? '✓' : ''}}</view>
+            <text class="agreement-agree-text">{{agreementCheckboxText}}</text>
+        </view>
+        <view class="btn-row">
+            <button class="btn btn-plain" bindtap="onDeclineAgreement">暂不使用</button>
+            <button class="btn btn-primary" loading="{{agreementSaving}}" disabled="{{agreementSaving}}" bindtap="onAgreeAgreement">同意并继续</button>
+        </view>
+    </view>
 </view>

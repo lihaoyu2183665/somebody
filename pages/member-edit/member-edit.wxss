@@ -1,0 +1,115 @@
+/* 用户服务协议：注册完善资料时强制阅读，勾选同意后方可继续。 */
+.agreement-mask {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 90;
+    background: rgba(24, 45, 62, 0.55);
+}
+
+.agreement-panel {
+    position: fixed;
+    left: 30rpx;
+    right: 30rpx;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 91;
+    max-height: 88vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding: 30rpx 28rpx 26rpx;
+    border-radius: 28rpx;
+    background: #F7FBFD;
+    box-shadow: 0 18rpx 50rpx rgba(60, 88, 110, 0.24);
+}
+
+.agreement-head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18rpx;
+}
+
+.agreement-title {
+    font-size: 34rpx;
+    font-weight: 700;
+    color: #274B68;
+}
+
+.agreement-body {
+    height: 56vh;
+    margin-bottom: 12rpx;
+}
+
+.agreement-intro {
+    display: block;
+    margin-bottom: 20rpx;
+    font-size: 28rpx;
+    line-height: 1.65;
+    font-weight: 600;
+    color: #3D78A8;
+}
+
+.agreement-section {
+    margin-bottom: 20rpx;
+}
+
+.agreement-section-title {
+    display: block;
+    margin-bottom: 10rpx;
+    font-size: 29rpx;
+    line-height: 1.5;
+    font-weight: 700;
+    color: #274B68;
+}
+
+.agreement-line {
+    display: block;
+    margin-bottom: 8rpx;
+    font-size: 27rpx;
+    line-height: 1.65;
+    color: #3B5468;
+}
+
+.agreement-sub {
+    padding-left: 28rpx;
+    color: #54708A;
+}
+
+.agreement-agree {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 18rpx 4rpx 24rpx;
+    border-top: 2rpx solid #DCEBF7;
+}
+
+.agreement-checkbox {
+    flex: none;
+    width: 38rpx;
+    height: 38rpx;
+    box-sizing: border-box;
+    border: 2rpx solid #8FA8BC;
+    border-radius: 8rpx;
+    background: #FFFFFF;
+    text-align: center;
+    line-height: 34rpx;
+    font-size: 28rpx;
+    color: #FFFFFF;
+}
+
+.agreement-checkbox-on {
+    border-color: #3D78A8;
+    background: #3D78A8;
+}
+
+.agreement-agree-text {
+    margin-left: 16rpx;
+    font-size: 28rpx;
+    font-weight: 600;
+    color: #274B68;
+}

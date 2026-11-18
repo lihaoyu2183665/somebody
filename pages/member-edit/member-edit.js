@@ -2,6 +2,13 @@ const api = require('../../utils/api');
 const ui = require('../../utils/ui');
 const profile = require('../../utils/profile');
 const avatarUtil = require('../../utils/avatar');
+const agreement = require('../../utils/agreement');
+
+// 提前标出协议里的子项，WXML 只做条件渲染：小程序插值里不允许调用 JS 方法。
+const AGREEMENT_SECTIONS = agreement.SECTIONS.map(section => ({
+    title: section.title,
+    lines: section.lines.map(text => ({ text, sub: text.indexOf('- ') === 0 })),
+}));
 
 // 兼容不同基础库：优先 chooseMedia，回退 chooseImage。
 function chooseImage() {
@@ -74,6 +81,14 @@ Page({
         uploading: false,
         submitting: false,
         error: '',
+        agreementTitle: agreement.TITLE,
+        agreementIntro: agreement.INTRO,
+        agreementCheckboxText: agreement.CHECKBOX_TEXT,
+        agreementSections: AGREEMENT_SECTIONS,
+        agreementVisible: false,
+        agreementChecked: false,
+        agreementSaving: false,
+        termsAgreedAtText: '',
     },
 
     onShow() {
@@ -132,7 +147,12 @@ Page({
                 ? '当前使用上传的照片头像'
                 : (preset ? '当前使用卡通头像'
                     : (member.avatar ? '原有文字头像已下线，请重新选择卡通头像' : '尚未设置头像，显示昵称首字')),
+            termsAgreedAtText: timeText(member.terms_agreed_at),
         });
+        // 尚未同意协议的会员每次进入资料页都必须先阅读并勾选，云端留痕后不再重复弹出。
+        if (!member.terms_agreed_at) {
+            this.setData({ agreementVisible: true, agreementChecked: false });
+        }
         this.refreshReview();
     },
 
@@ -145,6 +165,42 @@ Page({
             reviewHint: profile.reviewHint(member),
             canSubmitReview: check.complete,
         });
+    },
+
+    // 用户服务协议：未同意时强制阅读；同意时间写入云端会员档案，作为可追溯记录。
+    onOpenAgreement() {
+        this.setData({ agreementVisible: true, agreementChecked: !!this.data.termsAgreedAtText });
+    },
+
+    onAgreementToggle() {
+        this.setData({ agreementChecked: !this.data.agreementChecked });
+    },
+
+    onDeclineAgreement() {
+        ui.toast('需同意《用户服务协议》后才能完善资料与使用小程序');
+        wx.switchTab({ url: '/pages/mine/mine' });
+    },
+
+    async onAgreeAgreement() {
+        if (this.data.agreementSaving) return;
+        if (!this.data.agreementChecked) {
+            ui.toast('请先勾选「' + agreement.CHECKBOX_TEXT + '」');
+            return;
+        }
+        this.setData({ agreementSaving: true, error: '' });
+        const result = await api.updateMember({ terms_agreed_at: new Date().toISOString() });
+        this.setData({ agreementSaving: false });
+        if (result.error) {
+            this.setData({ error: result.error.message });
+            ui.toast(result.error.message);
+            return;
+        }
+        this.setData({
+            agreementVisible: false,
+            agreementChecked: false,
+            termsAgreedAtText: timeText(result.data && result.data.terms_agreed_at),
+        });
+        ui.success('已同意《用户服务协议》');
     },
 
     buildPayload() {
@@ -243,6 +299,10 @@ Page({
 
     // 保存资料不等于提交审核：允许先保存半成品，之后再补全并正式提交。
     async onSubmit() {
+        if (!this.data.termsAgreedAtText) {
+            this.setData({ agreementVisible: true, agreementChecked: false, error: '请先阅读并同意《用户服务协议》' });
+            return;
+        }
         const member = formMember(this.data);
         const error = !String(member.display_name || '').trim()
             ? '请填写昵称'
@@ -269,6 +329,10 @@ Page({
     // 提交审核：先保存表单，再由云端触发器复核完整度并写入 submitted_at。
     async onSubmitReview() {
         if (this.data.reviewSubmitting) return;
+        if (!this.data.termsAgreedAtText) {
+            this.setData({ agreementVisible: true, agreementChecked: false, error: '请先阅读并同意《用户服务协议》' });
+            return;
+        }
         const check = profile.reviewCheck(formMember(this.data));
         if (!check.complete) {
             const message = `请先补充：${check.missing.join('、')}`;

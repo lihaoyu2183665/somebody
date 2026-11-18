@@ -1201,6 +1201,38 @@ assert.deepStrictEqual(
     check(riskStyle.indexOf('.risk-panel') >= 0 && riskStyle.indexOf('.risk-checkbox-on') >= 0,
         'risk notice has dedicated panel and checkbox styles');
 
+    // 用户服务协议：完善资料时强制阅读勾选，同意时间写入云端档案留痕。
+    const terms = require('../utils/agreement');
+    const termsLogic = fs.readFileSync(path.join(root, 'pages/member-edit/member-edit.js'), 'utf8');
+    const termsView = fs.readFileSync(path.join(root, 'pages/member-edit/member-edit.wxml'), 'utf8');
+    const termsStyle = fs.readFileSync(path.join(root, 'pages/member-edit/member-edit.wxss'), 'utf8');
+    check(terms.TITLE === '用户服务协议'
+        && terms.INTRO.indexOf('欢迎使用【雪狸ski滑雪小程序】') >= 0
+        && terms.CHECKBOX_TEXT.indexOf('我已阅读并同意') >= 0
+        && terms.SECTIONS.length === 8
+        && terms.SECTIONS[0].title === '第一条 业务范围说明'
+        && terms.SECTIONS[7].title === '第八条 争议管辖',
+        'service agreement exposes all eight sections');
+    check(terms.SECTIONS.some(section => section.lines.some(line => line.indexOf('不属于旅行社包价旅游业务') >= 0))
+        && terms.SECTIONS.some(section => section.lines.some(line => line.indexOf('不核验教练资质') >= 0))
+        && terms.SECTIONS.some(section => section.lines.some(line => line.indexOf('由东营有管辖权人民法院管辖') >= 0)),
+        'agreement keeps business scope, free boards and jurisdiction clauses');
+    check(termsLogic.indexOf('require' + "('../../utils/agreement')") >= 0
+        && termsLogic.indexOf('terms_agreed_at: new Date().toISOString()') >= 0
+        && termsLogic.indexOf('async onAgreeAgreement()') >= 0
+        && termsLogic.indexOf('onDeclineAgreement()') >= 0
+        && termsLogic.indexOf('请先阅读并同意《用户服务协议》') >= 0,
+        'consent is required before saving and stored in the cloud member record');
+    check(termsView.indexOf('用户服务协议') >= 0
+        && termsView.indexOf('wx:for="{{agreementSections}}"') >= 0
+        && termsView.indexOf('{{agreementCheckboxText}}') >= 0
+        && termsView.indexOf('bindtap="onAgreeAgreement"') >= 0
+        && termsView.indexOf('bindtap="onOpenAgreement"') >= 0
+        && termsView.indexOf('charAt') < 0,
+        'agreement view renders full text with a gated checkbox');
+    check(termsStyle.indexOf('.agreement-panel') >= 0 && termsStyle.indexOf('.agreement-checkbox-on') >= 0,
+        'agreement has dedicated scrollable panel and checkbox styles');
+
     // 高级管理员：唯一最高层级，继承全部管理员能力，档案对其他用户不可见。
     const hierarchyGuard = fs.readFileSync(path.join(root, 'utils/guard.js'), 'utf8');
     const hierarchyMine = fs.readFileSync(path.join(root, 'pages/mine/mine.js'), 'utf8');
@@ -1228,7 +1260,7 @@ assert.deepStrictEqual(
     const ordinaryAdminAccess = await guard.access();
     eq(ordinaryAdminAccess.isSuperAdmin, false, 'ordinary admin is not super admin');
 
-    console.log(`PASS ${passed} 项工具函数、四级权限、提交审核门禁、角色配色、仅卡通头像、教练头像可更换与无名称标签、我的页无自定义头像入口、四大模块照片背景、实名资料、Excel 导出、报名人员名单、管理员报名、快捷入口、单一微信授权登录、收款与支付管理员专属、用户删除与重新注册、角色后实名姓名、雪狸品牌 LOGO 展示、护眼淡蓝主题、底部按钮式导航、报名人员点击详情与三要素权限、全站导出下线、我的页头像唯一入口、支付状态机、全模块访客概览与详情门禁、高级管理员层级、报名风险告知、合规断言`);
+    console.log(`PASS ${passed} 项工具函数、四级权限、提交审核门禁、角色配色、仅卡通头像、教练头像可更换与无名称标签、我的页无自定义头像入口、四大模块照片背景、实名资料、Excel 导出、报名人员名单、管理员报名、快捷入口、单一微信授权登录、收款与支付管理员专属、用户删除与重新注册、角色后实名姓名、雪狸品牌 LOGO 展示、护眼淡蓝主题、底部按钮式导航、报名人员点击详情与三要素权限、全站导出下线、我的页头像唯一入口、支付状态机、全模块访客概览与详情门禁、高级管理员层级、报名风险告知、用户服务协议、合规断言`);
 })().catch(error => {
     console.error('FAIL', error.message);
     process.exit(1);
