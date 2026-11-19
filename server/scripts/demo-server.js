@@ -17,8 +17,21 @@ const fs = require('fs');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const snapshot = require('../data/cloud-export.json');
 const policy = require('../src/policy');
+
+// 数据源：本地有真实快照（含个人信息，被 Git 忽略）则优先用；
+// 纯净 clone 没有时，回退到入库的脱敏种子，保证开箱即跑。
+function loadSnapshot() {
+  const candidates = [
+    path.join(__dirname, '..', 'data', 'cloud-export.json'),
+    path.join(__dirname, '..', 'data', 'seed.json'),
+  ];
+  for (const file of candidates) {
+    if (fs.existsSync(file)) return require(file);
+  }
+  throw new Error('缺少演示数据源：请将 data/cloud-export.json 或 data/seed.json 放到 server/data/ 下');
+}
+const snapshot = loadSnapshot();
 
 const PORT = Number(process.env.PORT || 3001);
 const HOST = process.env.HOST || '0.0.0.0';
