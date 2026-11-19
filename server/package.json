@@ -1,0 +1,20 @@
+{
+  "name": "ski-club-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "滑雪俱乐部小程序自建后端（Express + MySQL）",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js",
+    "migrate": "node scripts/migrate.js",
+    "test": "node scripts/selftest.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.5.0",
+    "mysql2": "^3.11.5"
+  }
+}

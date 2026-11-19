@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: ski-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret_change_me}
+      MYSQL_DATABASE: ski_club
+      MYSQL_USER: ${DB_USER:-ski}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-ski_secret_change_me}
+      TZ: Asia/Shanghai
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD:-root_secret_change_me}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ski-net
+
+  api:
+    build: .
+    container_name: ski-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 3001
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-ski}
+      DB_PASSWORD: ${DB_PASSWORD:-ski_secret_change_me}
+      DB_NAME: ski_club
+      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-long-random-string}
+      JWT_EXPIRES_IN: 30d
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-skiclub2026}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+      WX_APPID: ${WX_APPID:-}
+      WX_SECRET: ${WX_SECRET:-}
+      TZ: Asia/Shanghai
+    volumes:
+      - upload_data:/app/uploads
+    networks:
+      - ski-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: ski-nginx
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - upload_data:/var/www/uploads:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    networks:
+      - ski-net
+
+volumes:
+  db_data:
+  upload_data:
+
+networks:
+  ski-net:
+    driver: bridge

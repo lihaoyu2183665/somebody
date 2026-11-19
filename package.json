@@ -1,9 +1,7 @@
 {
   "name": "ski-club-miniprogram",
   "version": "1.0.0",
-  "description": "滑雪俱乐部会员报名与拼团活动小程序",
+  "description": "滑雪俱乐部会员报名与拼团活动小程序（数据走 server/ 自建后端）",
   "private": true,
-  "dependencies": {
-    "@tencent-ai/workbuddy-cloud-sdk": "dev"
-  }
+  "dependencies": {}
 }

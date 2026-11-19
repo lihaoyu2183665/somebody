@@ -1,7 +1,6 @@
-/* 端侧 SDK 功能测试：管理员发布可见性、收款配置仅管理员可读、关闭重开数据仍在、
-   订单私有性与匿名写入拦截。
-   前置：由管理端 SQL 准备 PAYMENT-PERSIST-CHECK 活动（管理员发布，触发自动审核通过）。
-   运行：node tools/data-plane-check.js */
+/* 【已弃用】旧 WorkBuddy Cloud 端侧 SDK 功能测试。
+   本项目已切换到 server/ 自建后端（Express + MySQL），此脚本依赖的云端 SDK 已从 package.json 移除，
+   运行会报模块缺失。新后端的自检请运行：node server/scripts/selftest.js。 */
 const { createWorkBuddyCloud } = require('@tencent-ai/workbuddy-cloud-sdk');
 
 const endpoint = 'https://mp-api.app.workbuddy.host';

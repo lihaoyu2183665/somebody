@@ -184,11 +184,69 @@ const mockCloud = {
     auth: { getSession: async () => ({ data: { user: { id: 'u1', name: '测试' } }, error: null }) },
     storage: {},
 };
+// 新 api.js 走 REST：用 mock request 翻译回旧 apiCalls 形状，保持既有用例断言不变。
+const mockRequest = (url, options) => {
+    const config = options || {};
+    const method = config.method || 'GET';
+    const match = /^\/api\/data\/([^/?]+)(\/[^?]*)?/.exec(url);
+    if (match) {
+        const table = match[1];
+        apiCalls.push({ op: 'from', table });
+        const idPart = match[2] ? match[2].slice(1) : null;
+        if (method === 'DELETE') {
+            apiCalls.push({ op: 'delete' });
+            apiCalls.push({ op: 'eq', column: 'id', value: Number(idPart) });
+            return Promise.resolve({ data: { removed: 1 }, error: null });
+        }
+        if (method === 'PUT') {
+            apiCalls.push({ op: 'update', patch: config.data || {} });
+            apiCalls.push({ op: 'eq', column: 'id', value: Number(idPart) });
+            return Promise.resolve({ data: Object.assign({ id: Number(idPart) }, config.data), error: null });
+        }
+        if (method === 'POST') {
+            apiCalls.push({ op: 'insert', patch: config.data || {} });
+            return Promise.resolve({ data: { id: 99 }, error: null });
+        }
+        return Promise.resolve({ data: [], error: null });
+    }
+    // 会员 / 收款等专用接口
+    if (url.indexOf('/api/members/me') >= 0 && method === 'PATCH') {
+        apiCalls.push({ op: 'update', patch: config.data || {} });
+        // 后端按登录态定位本人行（owner_id = 当前用户），等价旧前端的 eq('owner_id', uid)。
+        apiCalls.push({ op: 'eq', column: 'owner_id', value: 'u1' });
+        return Promise.resolve({ data: Object.assign({ id: 1, owner_id: 'u1' }, config.data), error: null });
+    }
+    if (url.indexOf('/api/members/review/') >= 0) {
+        const id = Number(url.split('/').pop());
+        apiCalls.push({ op: 'update', patch: { status: (config.data || {}).status } });
+        apiCalls.push({ op: 'eq', column: 'id', value: id });
+        return Promise.resolve({ data: { id }, error: null });
+    }
+    if (url.indexOf('/api/members/role/') >= 0) {
+        const id = Number(url.split('/').pop());
+        const role = (config.data || {}).role;
+        // 后端 setMemberRole 对 admin/coach 会同步激活为正式会员。
+        apiCalls.push({ op: 'update', patch: (role === 'admin' || role === 'coach') ? { role, status: 'active', review_note: null } : { role } });
+        apiCalls.push({ op: 'eq', column: 'id', value: id });
+        return Promise.resolve({ data: { id }, error: null });
+    }
+    if (url.indexOf('/api/members/') >= 0 && method === 'DELETE') {
+        const id = Number(url.split('/').pop());
+        apiCalls.push({ op: 'from', table: 'members' });
+        apiCalls.push({ op: 'delete' });
+        apiCalls.push({ op: 'eq', column: 'id', value: id });
+        return Promise.resolve({ data: { removed: 1 }, error: null });
+    }
+    if (url.indexOf('/api/auth/session') >= 0) return Promise.resolve({ data: { user: { id: 'u1', name: '测试' } }, error: null });
+    if (url.indexOf('/api/members/ensure') >= 0) return Promise.resolve({ data: { id: 1, role: 'member', status: 'draft', owner_id: 'u1' }, error: null });
+    return Promise.resolve({ data: null, error: null });
+};
+const mockUploadFile = () => Promise.resolve({ data: 'mock.jpg', error: null });
 const apiSandbox = {
     module: { exports: {} },
     exports: {},
     console,
-    require: name => (name === './cloud' ? { cloud: mockCloud } : null),
+    require: name => (name === './cloud' ? { cloud: mockCloud, request: mockRequest, uploadFile: mockUploadFile } : null),
     getApp: () => ({ globalData: {} }),
     wx: {},
 };
@@ -804,13 +862,14 @@ assert.deepStrictEqual(
         && guardLogicNow.indexOf('该账号已被管理员移除，请重新登录注册') >= 0,
         'legacy removed accounts are told to re-register');
     check(deleteApiNow.indexOf('async function deleteMember') >= 0
-        && deleteApiNow.indexOf("return remove('members', id)") >= 0
+        && deleteApiNow.indexOf("/api/members/${id}") >= 0
+        && deleteApiNow.indexOf("method: 'DELETE'") >= 0
         && deleteApiNow.indexOf('async function cancelMember') < 0
         && deleteApiNow.indexOf('async function restoreMember') < 0,
         'api hard-deletes members with no cancel / restore path');
     check(deleteApiNow.indexOf('async function ensureMember') >= 0
-        && deleteApiNow.indexOf('if (found.data)') >= 0
-        && deleteApiNow.indexOf('.insert({') >= 0,
+        && deleteApiNow.indexOf('/api/members/ensure') >= 0
+        && deleteApiNow.indexOf('method: \'POST\'') >= 0,
         'deleted account re-registers automatically on next login');
     check(loginLogicNow.indexOf("const active = member && member.status === 'active'") >= 0
         && loginLogicNow.indexOf('该账号已被管理员移除，请重新登录注册') >= 0,
@@ -842,7 +901,10 @@ assert.deepStrictEqual(
         && adminViewNow.indexOf('bindtap="onDeleteMember">删除用户') >= 0
         && adminViewNow.indexOf('恢复账号') < 0,
         'review center shares the same delete flow');
-    const hardDeleteOffenders = sourceFiles.filter(file => /remove\(['"]members['"]/.test(fs.readFileSync(file, 'utf8')));
+    const hardDeleteOffenders = sourceFiles.filter(file => {
+        const text = fs.readFileSync(file, 'utf8');
+        return /remove\(['"]members['"]/.test(text) || /\/api\/members\/\$\{id\}/.test(text);
+    });
     eq(hardDeleteOffenders.length, 1, 'only api.js can hard-delete member profiles: ' + hardDeleteOffenders.join(','));
 
     // 用户信息查看页：角色标签后直接附实名姓名，历史已移除账号无名可显则只显示角色。

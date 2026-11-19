@@ -1,6 +1,6 @@
-/* 云端数据面连通测试：匿名读取各表，验证 SDK 初始化、端点与 RLS 公开读策略。
-   运行：node tools/smoke-test.js
-   不打印任何密钥或用户数据。 */
+/* 【已弃用】旧 WorkBuddy Cloud 数据面连通测试。
+   本项目已切换到 server/ 自建后端（Express + MySQL），此脚本依赖的云端 SDK 已从 package.json 移除，
+   运行会报模块缺失。新后端的自检请运行：node server/scripts/selftest.js。 */
 const { createWorkBuddyCloud } = require('@tencent-ai/workbuddy-cloud-sdk');
 
 const endpoint = 'https://mp-api.app.workbuddy.host';
