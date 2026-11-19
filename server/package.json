@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node src/index.js",
+    "demo": "node scripts/demo-server.js",
     "migrate": "node scripts/migrate.js",
     "test": "node scripts/selftest.js"
   },

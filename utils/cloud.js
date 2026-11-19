@@ -2,8 +2,9 @@
 // 所有请求走 wx.request，会话 token 存本地。保留 cloud.auth 的形状，
 // 让 app.js 与既有代码无感切换；api.js 直接用 request 调用 REST 接口。
 
-// 部署后必须把这里替换为后端实际对外域名（Nginx 暴露的地址）。
-const BASE_URL = 'https://ski.your-domain.com';
+// 服务地址统一在 utils/config.js 维护（小程序 / 一体化服务 / 网页后台共用）。
+const { API_BASE_URL } = require('./config');
+const BASE_URL = API_BASE_URL;
 
 function getToken() {
     try { return wx.getStorageSync('ski_token') || ''; } catch (e) { return ''; }

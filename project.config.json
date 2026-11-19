@@ -14,7 +14,7 @@
     "es6": true,
     "minified": true,
     "postcss": true,
-    "urlCheck": true
+    "urlCheck": false
   },
   "compileType": "miniprogram",
   "appid": "touristappid",
