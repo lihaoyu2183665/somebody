@@ -3,3 +3,4 @@ node_modules/
 uploads/
 *.log
 data/cloud-export.json
+data/*.bak

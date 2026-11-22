@@ -66,21 +66,27 @@ function failure(message) {
     return { data: null, error: { message } };
 }
 
+// 返回裸 session 对象 { user, member, token } 或 null，与迁移前云端 SDK 契约一致。
+// 所有页面（mine/coaches/coach-edit/member-edit）与 guard 都按 session.user.id 使用，
+// 切勿直接返回 request 的 { data, error } 包装，否则 session.user 为 undefined 会导致页面卡在加载态。
 async function getSession() {
-    return request('/api/auth/session');
+    const result = await request('/api/auth/session');
+    if (result.error || !result.data) return null;
+    getApp().globalData.session = result.data;
+    return result.data;
 }
 
 // 会员注册：首次登录后创建档案；每次调用都从后端重读，确保审核结果实时生效。
 async function ensureMember() {
     const app = getApp();
     const session = await getSession();
-    if (session.error || !session.data) {
+    if (!session || !session.user) {
         app.globalData.member = null;
         return null;
     }
     const result = await request('/api/members/ensure', {
         method: 'POST',
-        data: { name: session.data.user && session.data.user.name },
+        data: { name: session.user.name },
     });
     if (result.error) {
         app.globalData.member = null;

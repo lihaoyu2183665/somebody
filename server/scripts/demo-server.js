@@ -13,6 +13,7 @@
 
 const express = require('express');
 const path = require('path');
+const os = require('os');
 const fs = require('fs');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -39,7 +40,20 @@ const SECRET = process.env.JWT_SECRET || 'ski-club-demo-only-secret';
 const JWT_EXPIRES = '30d';
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'demo1234';
-const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL || '').replace(/\/$/, '') || ('http://127.0.0.1:' + PORT);
+// 图片签名地址必须用「局域网 IP」而非 127.0.0.1：小程序在真机上访问 127.0.0.1
+// 指向手机自身，图片加载失败。默认取本机首个非回环 IPv4，与 utils/config.js 保持一致；
+// 换网络后若 IP 变化，可用环境变量 PUBLIC_BASE_URL 显式覆盖。
+function localIPv4() {
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) return net.address;
+    }
+  }
+  return '127.0.0.1';
+}
+const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL || '').replace(/\/$/, '')
+  || ('http://' + localIPv4() + ':' + PORT);
 
 const TABLES = [
   'members', 'carpool_posts', 'carpool_signups', 'coach_bookings',
@@ -109,6 +123,9 @@ app.use('/api', (req, res, next) => {
   req.access = loadAccess(req.openid);
   next();
 });
+
+// ---------- 健康检查（与生产版一致，便于自检服务是否在线）----------
+app.get('/api/health', (req, res) => ok(res, { ok: true, time: now(), mode: 'demo' }));
 
 // ---------- 登录入口 ----------
 app.post('/api/auth/wechat-login', (req, res) => {

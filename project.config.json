@@ -2,10 +2,12 @@
   "description": "雪域俱乐部 · 会员报名与拼团活动小程序",
   "packOptions": {
     "ignore": [
-      {
-        "type": "folder",
-        "value": ".workbuddy"
-      }
+      { "type": "folder", "value": ".workbuddy" },
+      { "type": "folder", "value": ".git" },
+      { "type": "folder", "value": "node_modules" },
+      { "type": "folder", "value": "server" },
+      { "type": "folder", "value": "tools" },
+      { "type": "folder", "value": "server/node_modules" }
     ],
     "include": []
   },

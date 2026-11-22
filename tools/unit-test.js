@@ -352,6 +352,12 @@ assert.deepStrictEqual(
     eq(cancelledMember.canPublish, false, 'cancelled member cannot publish');
     eq(guard.actionHint('cancelled'), '该账号已被管理员移除，请重新登录注册', 'removed account action hint');
 
+    // getSession 必须返回裸 session 对象（含 user），而非 { data, error } 包装。
+    // 所有页面按 session.user.id 读取；若返回包装对象，mine 页会卡在「正在加载会员信息」。
+    const sessionNow = await api.getSession();
+    check(sessionNow && sessionNow.user && sessionNow.user.id === 'u1' && !('data' in sessionNow),
+        'getSession unwraps to bare session with user (pages use session.user.id)');
+
     // 删除用户走物理删除：不再通过改状态停用，也不再提供恢复动作。
     apiCalls.length = 0;
     const deletedResult = await api.deleteMember(9);
